@@ -7,38 +7,91 @@ public class GameInputManager : MonoBehaviour {
 
     private PlayerInputActions playerInputActions;
 
-    public Vector2 MoveInput { get; private set; }
-    public Vector2 LookInput { get; private set; }
+    // Input States
+    private Vector2 moveInput;
+    private Vector2 lookInput;
+    private bool isSprinting;
+    private bool isJumpPressed;
+    private bool isJumpHeld;
 
-    // Events
+    // Input Events
     public event Action OnJump;
+    public event Action OnJumpCanceled;
     public event Action OnInteract;
     public event Action OnFire;
+    public event Action OnSprintStart;
+    public event Action OnSprintEnd;
 
     private void Awake() {
-        if (Instance != null && Instance != this)
+        if (Instance != null && Instance != this) {
             Destroy(gameObject);
-        else
-            Instance = this;
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
 
         playerInputActions = new PlayerInputActions();
+        InitializeInputActions();
     }
 
     private void OnEnable() {
         playerInputActions.Player.Enable();
-
-        playerInputActions.Player.Move.performed += ctx => MoveInput = ctx.ReadValue<Vector2>();
-        playerInputActions.Player.Move.canceled += ctx => MoveInput = Vector2.zero;
-
-        playerInputActions.Player.Look.performed += ctx => LookInput = ctx.ReadValue<Vector2>();
-        playerInputActions.Player.Look.canceled += ctx => LookInput = Vector2.zero;
-
-        playerInputActions.Player.Jump.performed += ctx => OnJump?.Invoke();
-        playerInputActions.Player.Interact.performed += ctx => OnInteract?.Invoke();
-        playerInputActions.Player.Fire.performed += ctx => OnFire?.Invoke();
     }
 
     private void OnDisable() {
         playerInputActions.Player.Disable();
     }
+
+    private void OnDestroy() {
+        if (Instance == this)
+            Instance = null;
+    }
+
+    private void InitializeInputActions() {
+        // Move
+        playerInputActions.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
+        playerInputActions.Player.Move.canceled += ctx => moveInput = Vector2.zero;
+
+        // Look
+        playerInputActions.Player.Look.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
+        playerInputActions.Player.Look.canceled += ctx => lookInput = Vector2.zero;
+
+        // Jump
+        playerInputActions.Player.Jump.started += ctx => {
+            isJumpPressed = true;
+            isJumpHeld = true;
+            OnJump?.Invoke();
+        };
+        playerInputActions.Player.Jump.canceled += ctx => {
+            isJumpHeld = false;
+            OnJumpCanceled?.Invoke();
+        };
+
+        // Sprint
+        playerInputActions.Player.Sprint.started += ctx => {
+            isSprinting = true;
+            OnSprintStart?.Invoke();
+        };
+        playerInputActions.Player.Sprint.canceled += ctx => {
+            isSprinting = false;
+            OnSprintEnd?.Invoke();
+        };
+
+        // Interact / Fire
+        playerInputActions.Player.Interact.performed += ctx => OnInteract?.Invoke();
+        playerInputActions.Player.Fire.performed += ctx => OnFire?.Invoke();
+    }
+
+    // Public Accessors for PlayerController / CameraController
+    public Vector2 GetMoveVector() => moveInput;
+    public Vector2 GetLookVector() => lookInput;
+    public bool GetSprintInput() => isSprinting;
+
+    // Jump Accessors
+    public bool IsJumpPressed() => isJumpPressed;
+    public bool IsJumpHeld() => isJumpHeld;
+
+    // Reset Jump Press (after consuming for jump buffer)
+    public void ConsumeJumpPress() => isJumpPressed = false;
 }
