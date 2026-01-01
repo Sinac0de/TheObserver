@@ -19,7 +19,7 @@ public class GameInputManager : MonoBehaviour {
     public event Action OnJump;
     public event Action OnJumpCanceled;
     public event Action OnInteract;
-    public event Action OnFire;
+    public event Action OnShoot;
     public event Action OnSprintStart;
     public event Action OnSprintEnd;
     public event Action OnCrouchStart;
@@ -81,9 +81,9 @@ public class GameInputManager : MonoBehaviour {
             OnSprintEnd?.Invoke();
         };
 
-        // Interact / Fire
+        // Interact / Shoot
         playerInputActions.Player.Interact.performed += ctx => OnInteract?.Invoke();
-        playerInputActions.Player.Fire.performed += ctx => OnFire?.Invoke();
+        playerInputActions.Player.Shoot.performed += ctx => OnShoot?.Invoke();
 
         // Crouch
         playerInputActions.Player.Crouch.started += ctx => {

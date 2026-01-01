@@ -3,9 +3,6 @@ using System;
 
 public class GameManager : MonoBehaviour {
     public static GameManager Instance { get; private set; }
-    public GameState CurrentState { get; private set; }
-
-    public event Action<GameState> OnGameStateChanged;
 
     public enum GameState {
         MainMenu,
@@ -14,13 +11,17 @@ public class GameManager : MonoBehaviour {
         GameOver
     }
 
+    public GameState CurrentState { get; private set; }
+
+    // Events
+    public event Action<GameState> OnGameStateChanged;
 
     private void Awake() {
-        if (Instance != null && Instance != this)
+        if (Instance != null && Instance != this) {
             Destroy(gameObject);
-        else
-            Instance = this;
-
+            return;
+        }
+        Instance = this;
         DontDestroyOnLoad(gameObject);
     }
 
@@ -29,19 +30,33 @@ public class GameManager : MonoBehaviour {
     }
 
     public void SetState(GameState newState) {
+        if (CurrentState == newState) return; 
+
         CurrentState = newState;
         OnGameStateChanged?.Invoke(newState);
+
         Debug.Log("Game State changed to: " + newState);
     }
 
     public void ResetRun() {
-        // Reset player position, ammo, health
-        // Reset room manager if needed
         Debug.Log("Run Reset");
+
+        // TODO: Reset player position, ammo, health
+        // TODO: Reset RoomManager / current room
     }
 
     public void GameOver() {
         SetState(GameState.GameOver);
-        // Show UI, play sound
+        Debug.Log("Game Over!");
+
+        // TODO: Show GameOver UI, play sound
+    }
+
+    // !!!TODO: REMOVE THESE TEST INPUTS
+    private void Update() {
+        if (Input.GetKeyDown(KeyCode.R))
+            ResetRun();
+        if (Input.GetKeyDown(KeyCode.G))
+            GameOver();
     }
 }
