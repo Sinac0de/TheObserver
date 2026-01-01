@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour {
     [Header("Movement")]
     public float walkSpeed = 4f;
     public float sprintSpeed = 8f;
+    public float crouchSpeed = 2f;
     public float acceleration = 15f;
     public float deceleration = 20f;
     public float airControl = 0.3f;
@@ -16,10 +17,17 @@ public class PlayerController : MonoBehaviour {
 
     [Header("Jump")]
     public float jumpForce = 10f;
+    public float crouchJumpForce = 8f;
     public float coyoteTime = 0.2f;
     public float jumpBufferTime = 0.2f;
     public int maxAirJumps = 1;
     public float jumpCutMultiplier = 0.5f;  // For responsive jump feel when releasing jump button
+
+    [Header("Crouch")]
+    public float standingHeight = 2f;
+    public float crouchingHeight = 1f;
+    public float crouchTransitionSpeed = 10f;
+    public float headbobReduction = 0.5f;
 
     [Header("Gravity")]
     public float gravityMultiplier = 2f;  // Normal gravity multiplier when falling
@@ -39,6 +47,14 @@ public class PlayerController : MonoBehaviour {
     private Vector2 moveInput;
     private Vector2 lookInput;
 
+    [Header("Crouch State")]
+    private bool isCrouching;
+    private bool isCrouchPressed;
+    private bool isAttemptingToStand;
+    private float currentHeight;
+    private float targetHeight;
+    private float lastCrouchPressTime;
+
     private void Awake() {
         controller = GetComponent<CharacterController>();
         controller.slopeLimit = slopeLimit;
@@ -49,6 +65,7 @@ public class PlayerController : MonoBehaviour {
         HandleInput();
         GroundCheck();
         JumpBuffering();
+        HandleCrouch();
         CalculateMovement();
         ApplyMovement();
         Look();
@@ -64,6 +81,19 @@ public class PlayerController : MonoBehaviour {
             lastJumpPressTime = Time.time;
             GameInputManager.Instance.ConsumeJumpPress();
         }
+
+        // Handle crouch input
+        bool crouchInput = GameInputManager.Instance.GetCrouchInput();
+        
+        // Toggle crouch on press (not hold)
+        if (crouchInput && !isCrouchPressed) {
+            isCrouchPressed = true;
+            lastCrouchPressTime = Time.time;
+            ToggleCrouch();
+        }
+        else if (!crouchInput) {
+            isCrouchPressed = false;
+        }
     }
 
     private void GroundCheck() {
@@ -74,6 +104,9 @@ public class PlayerController : MonoBehaviour {
         isGrounded = grounded;
         if (isGrounded) lastGroundedTime = Time.time;
         if (isGrounded && verticalVelocity < 0) verticalVelocity = -2f;
+
+        // Reset crouch attempt when grounded
+        if (isGrounded) isAttemptingToStand = false;
     }
 
     private void JumpBuffering() {
@@ -82,8 +115,10 @@ public class PlayerController : MonoBehaviour {
         bool bufferActive = Time.time - lastJumpPressTime <= jumpBufferTime;
 
         if ((canJump || hasAirJumps) && bufferActive) {
-            // Add a small boost to the jump to make it feel snappier
-            verticalVelocity = jumpForce;
+            // Use appropriate jump force based on crouch state
+            float actualJumpForce = isCrouching ? crouchJumpForce : jumpForce;
+            verticalVelocity = actualJumpForce;
+            
             // Apply a small horizontal boost on ground jumps to feel more responsive
             if (isGrounded) {
                 moveVelocity.y = 0f; // Reset vertical velocity to ensure consistent jump height
@@ -95,7 +130,16 @@ public class PlayerController : MonoBehaviour {
     }
 
     private void CalculateMovement() {
-        float targetSpeed = isSprinting ? sprintSpeed : walkSpeed;
+        // Determine target speed based on movement states
+        float targetSpeed = walkSpeed;
+        
+        if (isCrouching) {
+            targetSpeed = crouchSpeed;
+        }
+        else if (isSprinting) {
+            targetSpeed = sprintSpeed;
+        }
+        
         Vector3 inputDir = new Vector3(moveInput.x, 0, moveInput.y).normalized;
         Vector3 targetVelocity = transform.TransformDirection(inputDir) * targetSpeed;
 
@@ -146,6 +190,98 @@ public class PlayerController : MonoBehaviour {
         if (cameraController != null) {
             cameraController.SetSprinting(isSprinting);
             cameraController.SetMovementState(isMoving);
+            cameraController.SetCrouching(isCrouching);
+            cameraController.SetHeadbobMultiplier(isCrouching ? headbobReduction : 1f);
         }
+    }
+
+    /// <summary>
+    /// Handles the crouching logic including height transitions and collision detection
+    /// </summary>
+    private void HandleCrouch() {
+        // Set target height based on crouch state
+        targetHeight = isCrouching ? crouchingHeight : standingHeight;
+        
+        // Smoothly interpolate to target height
+        currentHeight = Mathf.Lerp(controller.height, targetHeight, crouchTransitionSpeed * Time.deltaTime);
+        
+        // Check if we can stand up (only when attempting to stand)
+        if (isAttemptingToStand && !isCrouching) {
+            if (CanStandUp()) {
+                isAttemptingToStand = false;
+            } else {
+                // Keep crouching if not enough space
+                currentHeight = crouchingHeight;
+                targetHeight = crouchingHeight;
+            }
+        }
+        
+        // Apply height change to controller
+        if (Mathf.Abs(controller.height - currentHeight) > 0.01f) {
+            AdjustControllerHeight(currentHeight);
+        }
+    }
+
+    /// <summary>
+    /// Toggles the crouch state
+    /// </summary>
+    private void ToggleCrouch() {
+        if (isCrouching) {
+            // Attempt to stand up
+            if (CanStandUp()) {
+                isCrouching = false;
+                isAttemptingToStand = false;
+            } else {
+                // Can't stand up due to ceiling, stay crouched
+                isAttemptingToStand = true;
+            }
+        } else {
+            // Start crouching
+            isCrouching = true;
+            isAttemptingToStand = false;
+        }
+    }
+
+    /// <summary>
+    /// Checks if there's enough clearance to stand up
+    /// </summary>
+    /// <returns>True if player can stand up, false otherwise</returns>
+    private bool CanStandUp() {
+        Vector3 capsuleTop = transform.position + Vector3.up * (standingHeight / 2f);
+        float radius = controller.radius;
+        
+        // Check for obstacles above the player
+        Collider[] hits = Physics.OverlapCapsule(
+            transform.position + Vector3.up * (crouchingHeight / 2f),
+            capsuleTop,
+            radius,
+            Physics.AllLayers,
+            QueryTriggerInteraction.Ignore
+        );
+
+        foreach (Collider hit in hits) {
+            if (hit.gameObject != gameObject && !hit.isTrigger) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Adjusts the character controller height and position smoothly
+    /// </summary>
+    /// <param name="newHeight">Target height for the controller</param>
+    private void AdjustControllerHeight(float newHeight) {
+        float heightDifference = newHeight - controller.height;
+        
+        // Adjust controller height
+        controller.height = newHeight;
+        
+        // Adjust center to maintain foot position
+        controller.center = Vector3.up * (newHeight / 2f);
+        
+        // Move player vertically to maintain ground contact
+        transform.position += Vector3.up * (heightDifference / 2f);
     }
 }

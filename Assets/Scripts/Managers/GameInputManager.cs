@@ -11,6 +11,7 @@ public class GameInputManager : MonoBehaviour {
     private Vector2 moveInput;
     private Vector2 lookInput;
     private bool isSprinting;
+    private bool isCrouching;
     private bool isJumpPressed;
     private bool isJumpHeld;
 
@@ -21,6 +22,8 @@ public class GameInputManager : MonoBehaviour {
     public event Action OnFire;
     public event Action OnSprintStart;
     public event Action OnSprintEnd;
+    public event Action OnCrouchStart;
+    public event Action OnCrouchEnd;
 
     private void Awake() {
         if (Instance != null && Instance != this) {
@@ -81,12 +84,23 @@ public class GameInputManager : MonoBehaviour {
         // Interact / Fire
         playerInputActions.Player.Interact.performed += ctx => OnInteract?.Invoke();
         playerInputActions.Player.Fire.performed += ctx => OnFire?.Invoke();
+
+        // Crouch
+        playerInputActions.Player.Crouch.started += ctx => {
+            isCrouching = true;
+            OnCrouchStart?.Invoke();
+        };
+        playerInputActions.Player.Crouch.canceled += ctx => {
+            isCrouching = false;
+            OnCrouchEnd?.Invoke();
+        };
     }
 
     // Public Accessors for PlayerController / CameraController
     public Vector2 GetMoveVector() => moveInput;
     public Vector2 GetLookVector() => lookInput;
     public bool GetSprintInput() => isSprinting;
+    public bool GetCrouchInput() => isCrouching;
 
     // Jump Accessors
     public bool IsJumpPressed() => isJumpPressed;

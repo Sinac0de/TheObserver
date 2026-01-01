@@ -21,6 +21,7 @@ public class FPSCameraController : MonoBehaviour {
     public float bobFrequency = 1.5f; // per step
     public float bobAmplitude = 0.05f;
     public AnimationCurve bobCurve = AnimationCurve.Linear(0, 0, 1, 1);
+    private float headbobMultiplier = 1f;
 
     [Header("Camera Sway")]
     public float swayAmount = 0.02f;
@@ -49,6 +50,9 @@ public class FPSCameraController : MonoBehaviour {
     // State
     private bool isMoving;
     private bool isSprinting;
+    private bool isCrouching;
+    private Vector3 crouchOffset = Vector3.zero;
+    private Vector3 targetCrouchOffset = Vector3.zero;
 
     private void Awake() {
         cam = GetComponent<Camera>();
@@ -71,6 +75,8 @@ public class FPSCameraController : MonoBehaviour {
 
     public void SetMovementState(bool moving) => isMoving = moving;
     public void SetSprinting(bool sprinting) => isSprinting = sprinting;
+    public void SetCrouching(bool crouching) => isCrouching = crouching;
+    public void SetHeadbobMultiplier(float multiplier) => headbobMultiplier = multiplier;
 
     public void AddShake(float intensity, float duration) {
         if (!enableShake) return;
@@ -89,13 +95,17 @@ public class FPSCameraController : MonoBehaviour {
         currentFOV = Mathf.Lerp(currentFOV, targetFOV, fovLerpSpeed * Time.deltaTime);
         cam.fieldOfView = currentFOV;
 
+        // Crouch offset calculation
+        targetCrouchOffset = isCrouching ? Vector3.down * 0.3f : Vector3.zero;
+        crouchOffset = Vector3.Lerp(crouchOffset, targetCrouchOffset, 10f * Time.deltaTime);
+
         // Head bob
         Vector3 bobOffset = Vector3.zero;
         if (enableHeadBob && isMoving) {
             bobTimer += Time.deltaTime * bobFrequency * (isSprinting ? 1.5f : 1f);
             float curveValue = bobCurve.Evaluate(Mathf.PingPong(bobTimer, 1f));
-            bobOffset.y = Mathf.Sin(bobTimer * Mathf.PI * 2f) * bobAmplitude * curveValue;
-            bobOffset.x = Mathf.Cos(bobTimer * Mathf.PI * 2f) * bobAmplitude * 0.5f;
+            bobOffset.y = Mathf.Sin(bobTimer * Mathf.PI * 2f) * bobAmplitude * curveValue * headbobMultiplier;
+            bobOffset.x = Mathf.Cos(bobTimer * Mathf.PI * 2f) * bobAmplitude * 0.5f * headbobMultiplier;
         }
 
         // Camera sway
@@ -113,6 +123,6 @@ public class FPSCameraController : MonoBehaviour {
             shakeOffset = Vector3.zero;
         }
 
-        transform.localPosition = initialLocalPos + bobOffset + swayOffset + shakeOffset;
+        transform.localPosition = initialLocalPos + crouchOffset + bobOffset + swayOffset + shakeOffset;
     }
 }
