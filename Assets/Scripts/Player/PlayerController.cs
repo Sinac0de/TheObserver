@@ -284,4 +284,35 @@ public class PlayerController : MonoBehaviour {
         // Move player vertically to maintain ground contact
         transform.position += Vector3.up * (heightDifference / 2f);
     }
+
+    private void OnEnable() {
+        // Subscribe to room events
+        RoomManager.Instance.OnRoomLoaded += OnRoomEntered;
+        RoomManager.Instance.OnTransitionStarted += OnTransitionStart;
+    }
+
+    private void OnDisable() {
+        RoomManager.Instance.OnRoomLoaded -= OnRoomEntered;
+        RoomManager.Instance.OnTransitionStarted -= OnTransitionStart;
+    }
+
+    private void OnRoomEntered(IRoom room) {
+        // Room-specific player constraints
+        if (room is HorrorRoomController horror) {
+            DisableJump(); // Horror room: no jump
+        }
+    }
+
+    private void OnTransitionStart() {
+        // Handle room transition start
+        // Reset any player states that need to be reset during transitions
+        if (isCrouching) {
+            // Make sure player can stand during transitions
+            isAttemptingToStand = true;
+        }
+    }
+
+    private void DisableJump() {
+        // Stub for horror state
+    }
 }
