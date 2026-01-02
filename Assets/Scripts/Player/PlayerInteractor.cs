@@ -48,7 +48,7 @@ public class PlayerInteractor : MonoBehaviour
         RaycastHit hit;
         
         // Visual debug ray
-        Debug.DrawRay(ray.origin, ray.direction * interactionDistance, Color.blue, 0.1f);
+        Debug.DrawRay(ray.origin, ray.direction * interactionDistance, Color.red, 0.1f);
         
         if (Physics.Raycast(ray, out hit, interactionDistance, interactionLayerMask))
         {
@@ -57,13 +57,17 @@ public class PlayerInteractor : MonoBehaviour
             {
                 currentTarget = interactable;
                 HighlightTarget(hit.collider);
-                
+
                 // Show interaction prompt in UI (TODO: Add UI system)
                 // Debug.Log($"Press [{interactKey}] to {interactable.prompt}");
+                Debug.DrawRay(ray.origin, ray.direction * interactionDistance, Color.green, 0.1f);
+
             }
         }
         else
         {
+            Debug.DrawRay(ray.origin, ray.direction * interactionDistance, Color.yellow, 0.1f);
+
             currentTarget = null;
         }
     }
