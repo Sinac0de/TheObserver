@@ -248,7 +248,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 73
+  m_VersionIndex: 79
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -400,6 +400,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36c92732ad2a28949b90f82038cd42e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ExitDoor
+  prompt: Interact
+  interactionRange: 3
+  interactionLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  exitPrompt: Exit Room
+  requireRoomCompletion: 1
+  OnExitReached:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1515708329631255130
 GameObject:
   m_ObjectHideFlags: 0
@@ -648,7 +658,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 5180
+  m_VersionIndex: 5186
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -1004,7 +1014,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 5180
+  m_VersionIndex: 5186
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -1404,7 +1414,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 5180
+  m_VersionIndex: 5186
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -1803,7 +1813,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 2717
+  m_VersionIndex: 2723
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -2577,7 +2587,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 5180
+  m_VersionIndex: 5186
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
