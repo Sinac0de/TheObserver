@@ -65,9 +65,17 @@ public class PuzzleRoomController : BaseRoomController {
         if (currentState == RoomState.Completing) return;
 
         currentState = RoomState.Completing;
+        Debug.Log("Puzzle completed! Opening exit door...");
 
         if (exitDoorAnimator != null) {
             exitDoorAnimator.SetTrigger("Open");
+        }
+
+        // Enable exit interaction
+        ExitDoor exitDoor = FindObjectOfType<ExitDoor>();
+        if (exitDoor != null)
+        {
+            exitDoor.EnableExit();
         }
 
         // Delay notifying the RoomManager to allow door animation to play

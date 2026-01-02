@@ -1197,12 +1197,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 972831425}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1927264385}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &980820425
 GameObject:
@@ -1233,7 +1233,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 663382b1b9c69c54b8c6b2ae6cb2e515, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoomManager
-  currentRoom: {fileID: 0}
+  labHubPrefab: {fileID: 0}
+  puzzleRoomPrefabs: []
+  horrorRoomPrefabs: []
+  bossRoomPrefab: {fileID: 0}
+  roomsRoot: {fileID: 0}
 --- !u!4 &980820427
 Transform:
   m_ObjectHideFlags: 0
@@ -1278,6 +1282,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c5f77cab85f8314ab03c7e99e388c93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  aiModel: {fileID: 11400000, guid: a59dddf1e584f7445a5e61229358b1ed, type: 2}
+  roomsCompleted: 0
+  deaths: 0
+  currentRunScore: 0
 --- !u!4 &1010523279
 Transform:
   m_ObjectHideFlags: 0
@@ -1912,6 +1920,55 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!1 &1549887179
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1549887181}
+  - component: {fileID: 1549887180}
+  m_Layer: 0
+  m_Name: DebugHUD
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1549887180
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1549887179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31b6d582f5fa53647bfdcd9b112ce263, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DebugAIOverlay
+  aiModel: {fileID: 11400000, guid: a59dddf1e584f7445a5e61229358b1ed, type: 2}
+  toggleKey: 282
+  visible: 1
+  backgroundColor: {r: 0, g: 0, b: 0, a: 0.6}
+  textColor: {r: 0, g: 1, b: 0, a: 1}
+--- !u!4 &1549887181
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1549887179}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.5, y: -0, z: 1.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1592097579
 GameObject:
   m_ObjectHideFlags: 0
@@ -2080,7 +2137,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2101866461}
-  - {fileID: 972831426}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &1992233661
@@ -2273,6 +2329,7 @@ GameObject:
   - component: {fileID: 2101866462}
   - component: {fileID: 2101866464}
   - component: {fileID: 2101866463}
+  - component: {fileID: 2101866465}
   m_Layer: 0
   m_Name: Camera
   m_TagString: MainCamera
@@ -2441,6 +2498,22 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &2101866465
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2101866460}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c400b20d5426cda45833984716735fb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInteractor
+  maxInteractDistance: 3
+  interactMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -2448,6 +2521,7 @@ SceneRoots:
   - {fileID: 1592097582}
   - {fileID: 1413899010}
   - {fileID: 1273537023}
+  - {fileID: 972831426}
   - {fileID: 1927264385}
   - {fileID: 1010523279}
   - {fileID: 743240852}
@@ -2455,3 +2529,4 @@ SceneRoots:
   - {fileID: 980820427}
   - {fileID: 951350651}
   - {fileID: 1027036067}
+  - {fileID: 1549887181}

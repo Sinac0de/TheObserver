@@ -8,7 +8,7 @@ public class RoomManager : MonoBehaviour {
     [SerializeField] private GameObject labHubPrefab;
     [SerializeField] private GameObject[] puzzleRoomPrefabs;
     [SerializeField] private GameObject[] horrorRoomPrefabs;
-    [SerializeField] private GameObject bossRoomPrefab;
+    [SerializeField] private GameObject[] bossRoomPrefabs;
 
     [Header("Runtime Parents")]
     [SerializeField] private Transform roomsRoot;
@@ -75,8 +75,13 @@ public class RoomManager : MonoBehaviour {
             prefabToUse = puzzleRoomPrefabs[0];
         else if (completed == 1 && horrorRoomPrefabs.Length > 0)
             prefabToUse = horrorRoomPrefabs[0];
+        else if (bossRoomPrefabs.Length > 0)
+            prefabToUse = bossRoomPrefabs[0]; // Boss room
         else
-            prefabToUse = bossRoomPrefab;
+        {
+            Debug.LogWarning("RoomManager: No boss room prefab assigned. Ending game.");
+            return;
+        }
 
         LoadRoomInternal(prefabToUse);
     }
@@ -132,8 +137,11 @@ public class RoomManager : MonoBehaviour {
         OnRoomFinished?.Invoke(currentRoom, success);
 
         // After each room, go back to Lab (for this jam loop)
-        if (success && GameManager.Instance.RoomsCompleted >= 3 && bossRoomPrefab != null) {
-            // End of run; could implement different logic here
+        if (success && GameManager.Instance.RoomsCompleted >= 3) {
+            // Player completed all 3 rooms - WIN!
+            Debug.Log("GAME COMPLETED! All rooms cleared.");
+            // TODO: Show victory screen
+            GameManager.Instance.ResetRun(); // Reset for endless mode
             LoadLabHub();
         } else {
             LoadLabHub();
