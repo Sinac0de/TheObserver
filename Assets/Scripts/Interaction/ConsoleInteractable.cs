@@ -20,28 +20,52 @@ public class ConsoleInteractable : Interactable
         audioSource = GetComponent<AudioSource>();
     }
 
+    [Header("Floor Selection")]
+    public bool isFloorSelector = false;
+    public int floorNumber = 1;
+    
     public override void Interact(GameObject interactor)
     {
         if (isActivated) return;
         
         isActivated = true;
-        Debug.Log("Console activated - Loading next room...");
         
-        // Visual feedback
-        if (activationParticles != null)
-            activationParticles.Play();
-            
-        if (consoleLight != null)
+        if (isFloorSelector)
         {
-            consoleLight.color = Color.green;
-            consoleLight.intensity *= 2f;
+            Debug.Log($"Floor {floorNumber} console activated...");
+            
+            // For elevator hub, call the hub controller
+            ElevatorHubController hub = FindObjectOfType<ElevatorHubController>();
+            if (hub != null)
+            {
+                hub.GoToFloor(floorNumber);
+            }
+            else
+            {
+                // Fallback: try to load specific room
+                LoadSpecificRoom();
+            }
         }
-        
-        if (audioSource != null && activationSound != null)
-            audioSource.PlayOneShot(activationSound);
-        
-        // Load next room after delay
-        Invoke(nameof(LoadNextRoom), activationDelay);
+        else
+        {
+            Debug.Log("Console activated - Loading next room...");
+            
+            // Visual feedback
+            if (activationParticles != null)
+                activationParticles.Play();
+                
+            if (consoleLight != null)
+            {
+                consoleLight.color = Color.green;
+                consoleLight.intensity *= 2f;
+            }
+            
+            if (audioSource != null && activationSound != null)
+                audioSource.PlayOneShot(activationSound);
+            
+            // Load next room after delay
+            Invoke(nameof(LoadNextRoom), activationDelay);
+        }
     }
 
     private void LoadNextRoom()
@@ -49,6 +73,27 @@ public class ConsoleInteractable : Interactable
         if (RoomManager.Instance != null)
         {
             RoomManager.Instance.LoadNextRoom();
+        }
+    }
+    
+    private void LoadSpecificRoom()
+    {
+        if (RoomManager.Instance != null)
+        {
+            RoomManager.RoomType roomType = RoomManager.RoomType.Maze;
+            switch (floorNumber)
+            {
+                case 1:
+                    roomType = RoomManager.RoomType.Maze;
+                    break;
+                case 2:
+                    roomType = RoomManager.RoomType.Horror;
+                    break;
+                case 3:
+                    roomType = RoomManager.RoomType.Boss;
+                    break;
+            }
+            RoomManager.Instance.LoadSpecificRoom(roomType);
         }
     }
 

@@ -9,6 +9,7 @@ public class RoomManager : MonoBehaviour {
     [SerializeField] private GameObject[] puzzleRoomPrefabs;
     [SerializeField] private GameObject[] horrorRoomPrefabs;
     [SerializeField] private GameObject[] bossRoomPrefabs;
+    [SerializeField] private GameObject elevatorRoomPrefab;
 
     [Header("Runtime Parents")]
     [SerializeField] private Transform roomsRoot;
@@ -42,6 +43,43 @@ public class RoomManager : MonoBehaviour {
         // Ensure Lab Hub is loaded at start
         LoadLabHub();
     }
+    
+    public void LoadElevator() {
+        OnTransitionStarted?.Invoke();
+
+        // Destroy current room
+        if (currentRoomGO != null) {
+            currentRoom?.OnPlayerExit();
+            Destroy(currentRoomGO);
+            currentRoomGO = null;
+            currentRoom = null;
+        }
+
+        // Hide Lab Hub
+        if (currentLabInstance != null)
+            currentLabInstance.SetActive(false);
+
+        // Load the elevator room prefab
+        GameObject elevatorPrefab = elevatorRoomPrefab;
+        
+        if (elevatorPrefab == null && puzzleRoomPrefabs.Length > 0)
+        {
+            // Fallback: use first puzzle room as elevator room
+            elevatorPrefab = puzzleRoomPrefabs[0];
+            Debug.LogWarning("No dedicated elevator room prefab assigned. Using first puzzle room as elevator.");
+        }
+
+        if (elevatorPrefab != null)
+        {
+            LoadRoomInternal(elevatorPrefab);
+        }
+        else
+        {
+            Debug.LogWarning("RoomManager: No elevator room prefab available.");
+            // Fallback: return to lab hub
+            LoadLabHub();
+        }
+    }
 
     public void LoadLabHub() {
         OnTransitionStarted?.Invoke();
@@ -68,6 +106,16 @@ public class RoomManager : MonoBehaviour {
     public void LoadNextRoom() {
         OnTransitionStarted?.Invoke();
 
+        // Check if we're coming from a completed room and need to return to elevator/lab
+        // If current room exists, it means we're completing a room and returning to hub
+        if (currentRoom != null)
+        {
+            // After completing a room, return to the elevator/lab hub
+            LoadLabHub();
+            return;
+        }
+        
+        // Otherwise, this is the initial loading of the next room in sequence
         int completed = GameManager.Instance.RoomsCompleted;
 
         GameObject prefabToUse = null;
@@ -84,6 +132,43 @@ public class RoomManager : MonoBehaviour {
         }
 
         LoadRoomInternal(prefabToUse);
+    }
+    
+    public void LoadSpecificRoom(RoomType roomType) {
+        OnTransitionStarted?.Invoke();
+        
+        GameObject prefabToUse = null;
+        
+        switch (roomType)
+        {
+            case RoomType.Maze:
+                if (puzzleRoomPrefabs.Length > 0) // Using puzzle room array for maze
+                    prefabToUse = puzzleRoomPrefabs[0];
+                break;
+            case RoomType.Horror:
+                if (horrorRoomPrefabs.Length > 0)
+                    prefabToUse = horrorRoomPrefabs[0];
+                break;
+            case RoomType.Boss:
+                if (bossRoomPrefabs.Length > 0)
+                    prefabToUse = bossRoomPrefabs[0];
+                break;
+        }
+        
+        if (prefabToUse == null)
+        {
+            Debug.LogError($"RoomManager: No prefab found for room type: {roomType}");
+            return;
+        }
+        
+        LoadRoomInternal(prefabToUse);
+    }
+    
+    public enum RoomType
+    {
+        Maze,
+        Horror,
+        Boss
     }
 
     private void LoadRoomInternal(GameObject roomPrefab) {
@@ -136,16 +221,8 @@ public class RoomManager : MonoBehaviour {
 
         OnRoomFinished?.Invoke(currentRoom, success);
 
-        // After each room, go back to Lab (for this jam loop)
-        if (success && GameManager.Instance.RoomsCompleted >= 3) {
-            // Player completed all 3 rooms - WIN!
-            Debug.Log("GAME COMPLETED! All rooms cleared.");
-            // TODO: Show victory screen
-            GameManager.Instance.ResetRun(); // Reset for endless mode
-            LoadLabHub();
-        } else {
-            LoadLabHub();
-        }
+        // After each room, go back to Lab Hub
+        LoadLabHub();
     }
 
     private void TeleportPlayerToSpawn(GameObject root, string spawnName) {

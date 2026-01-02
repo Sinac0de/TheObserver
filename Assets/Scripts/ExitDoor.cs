@@ -1,10 +1,14 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 public class ExitDoor : Interactable
 {
     [Header("Exit Door Settings")]
     public string exitPrompt = "Exit Room";
     public bool requireRoomCompletion = true;
+    
+    [Header("Events")]
+    public UnityEvent OnExitReached;
     
     private bool canExit = false;
     private IRoom currentRoom;
@@ -28,6 +32,7 @@ public class ExitDoor : Interactable
         if (!canExit) return;
         
         Debug.Log("Exiting room successfully!");
+        OnExitReached?.Invoke();
         
         if (currentRoom != null && RoomManager.Instance != null)
         {
@@ -45,6 +50,9 @@ public class ExitDoor : Interactable
     {
         // Legacy trigger support
         if (!other.CompareTag("Player") || !canExit) return;
+        
+        Debug.Log("Exiting room successfully!");
+        OnExitReached?.Invoke();
         
         if (currentRoom != null && RoomManager.Instance != null)
         {

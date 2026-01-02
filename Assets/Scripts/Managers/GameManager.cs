@@ -42,6 +42,13 @@ public class GameManager : MonoBehaviour {
     public void RegisterRoomCompleted(int scoreGain = 100) {
         roomsCompleted++;
         currentRunScore += scoreGain;
+        
+        // Check win condition
+        if (roomsCompleted >= 3)
+        {
+            Debug.Log("PLAYER WINS! All 3 rooms completed.");
+            // TODO: Trigger win sequence/escape
+        }
     }
 
     /// <summary>

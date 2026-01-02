@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[RequireComponent(typeof(CharacterController))]
+//[RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour {
     [Header("Components")]
     private CharacterController controller;
@@ -77,7 +77,8 @@ public class PlayerController : MonoBehaviour {
         lookInput = GameInputManager.Instance.GetLookVector();
         isSprinting = GameInputManager.Instance.GetSprintInput() && moveInput.magnitude > 0.1f;
 
-        if (GameInputManager.Instance.IsJumpPressed()) {
+        // Only handle jump input if not in a room that restricts it
+        if (GameInputManager.Instance.IsJumpPressed() && CanJump()) {
             lastJumpPressTime = Time.time;
             GameInputManager.Instance.ConsumeJumpPress();
         }
@@ -86,7 +87,7 @@ public class PlayerController : MonoBehaviour {
         bool crouchInput = GameInputManager.Instance.GetCrouchInput();
         
         // Toggle crouch on press (not hold)
-        if (crouchInput && !isCrouchPressed) {
+        if (crouchInput && !isCrouchPressed && CanCrouch()) {
             isCrouchPressed = true;
             lastCrouchPressTime = Time.time;
             ToggleCrouch();
@@ -95,6 +96,28 @@ public class PlayerController : MonoBehaviour {
             isCrouchPressed = false;
         }
     }
+    
+    private bool CanJump()
+    {
+        // Check if current room restricts jumping
+        if (currentRoom is HorrorRoomController)
+        {
+            return false; // Horror rooms disable jumping
+        }
+        return true;
+    }
+    
+    private bool CanCrouch()
+    {
+        // Check if current room restricts crouching
+        if (currentRoom is HorrorRoomController)
+        {
+            return false; // Horror rooms disable crouching
+        }
+        return true;
+    }
+    
+    private IRoom currentRoom; // Reference to current room for restrictions
 
     private void GroundCheck() {
         bool grounded = controller.isGrounded;
@@ -297,10 +320,24 @@ public class PlayerController : MonoBehaviour {
     }
 
     private void OnRoomEntered(IRoom room) {
-        // Room-specific player constraints
-        if (room is HorrorRoomController horror) {
-            DisableJump(); // Horror room: no jump
-        }
+        // Set current room reference
+        currentRoom = room;
+        
+        // Room-specific player constraints are handled by input methods
+        // Jump/crouch restrictions are applied at input time
+    }
+    
+    private void EnableAllMovement() {
+        // Ensure all movement is enabled in maze/boss rooms
+        // This overrides any previous restrictions
+    }
+    
+    private void DisableJump() {
+        // In horror rooms, jump is disabled
+        // We can implement this by setting jump force to 0
+        // or by not processing jump input
+        // For now, we'll just log it
+        Debug.Log("Jump disabled in this room type");
     }
 
     private void OnTransitionStart() {
@@ -312,7 +349,5 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    private void DisableJump() {
-        // Stub for horror state
-    }
+
 }

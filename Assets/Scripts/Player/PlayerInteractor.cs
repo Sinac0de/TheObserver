@@ -1,6 +1,5 @@
 using UnityEngine;
 
-[RequireComponent(typeof(PlayerController))]
 public class PlayerInteractor : MonoBehaviour
 {
     [Header("Interaction Settings")]
