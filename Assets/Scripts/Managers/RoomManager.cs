@@ -106,16 +106,7 @@ public class RoomManager : MonoBehaviour {
     public void LoadNextRoom() {
         OnTransitionStarted?.Invoke();
 
-        // Check if we're coming from a completed room and need to return to elevator/lab
-        // If current room exists, it means we're completing a room and returning to hub
-        if (currentRoom != null)
-        {
-            // After completing a room, return to the elevator/lab hub
-            LoadLabHub();
-            return;
-        }
-        
-        // Otherwise, this is the initial loading of the next room in sequence
+        // This is only used for initial loading of the first room
         int completed = GameManager.Instance.RoomsCompleted;
 
         GameObject prefabToUse = null;
@@ -221,8 +212,45 @@ public class RoomManager : MonoBehaviour {
 
         OnRoomFinished?.Invoke(currentRoom, success);
 
-        // After each room, go back to Lab Hub
-        LoadLabHub();
+        // After each room, load the next floor via elevator
+        LoadNextFloor();
+    }
+    
+    private void LoadNextFloor() {
+        int completed = GameManager.Instance.RoomsCompleted;
+        
+        // Check win condition
+        if (completed >= 3) {
+            Debug.Log("All rooms completed! Player wins!");
+            // TODO: Trigger win sequence
+            LoadLabHub(); // Return to hub for win sequence
+            return;
+        }
+        
+        // Load next floor based on completion count
+        switch (completed) {
+            case 0: // Just completed Floor 1 (Maze), load Floor 2 (Horror)
+                if (horrorRoomPrefabs.Length > 0) {
+                    LoadRoomInternal(horrorRoomPrefabs[0]);
+                } else {
+                    Debug.LogError("No Horror room prefab available!");
+                }
+                break;
+            case 1: // Just completed Floor 2 (Horror), load Floor 3 (Boss)
+                if (bossRoomPrefabs.Length > 0) {
+                    LoadRoomInternal(bossRoomPrefabs[0]);
+                } else {
+                    Debug.LogError("No Boss room prefab available!");
+                }
+                break;
+            case 2: // Just completed Floor 3 (Boss), win condition
+                Debug.Log("All floors completed! Player wins!");
+                LoadLabHub(); // Return to hub for win sequence
+                break;
+            default:
+                LoadLabHub(); // Fallback
+                break;
+        }
     }
 
     private void TeleportPlayerToSpawn(GameObject root, string spawnName) {

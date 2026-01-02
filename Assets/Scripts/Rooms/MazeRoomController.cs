@@ -12,12 +12,9 @@ public class MazeRoomController : BaseRoomController
     public float enemySpawnMultiplier = 1.0f;
     public float trapSpawnMultiplier = 1.0f;
     
-    [Header("Exit")]
-    public ExitDoor exitDoor;
-    
     private int regenerationCount = 0;
     private bool exitReached = false;
-
+    
     protected override void ApplyAIDifficulty()
     {
         if (aiModel == null)
@@ -73,7 +70,7 @@ public class MazeRoomController : BaseRoomController
         }
     }
 
-    public void OnPlayerReachedExit()
+    public void CompleteMaze()
     {
         if (exitReached) return;
         
@@ -119,20 +116,15 @@ public class MazeRoomController : BaseRoomController
     {
         GenerateMaze();
     }
-
-    private void Start()
+    
+    // Method for external systems (like MazeExitElevator) to trigger completion
+    public void TriggerMazeCompletion()
     {
-        if (exitDoor != null)
+        if (!exitReached)
         {
-            exitDoor.OnExitReached.AddListener(OnPlayerReachedExit);
+            CompleteMaze();
         }
     }
 
-    private void OnDestroy()
-    {
-        if (exitDoor != null)
-        {
-            exitDoor.OnExitReached.RemoveListener(OnPlayerReachedExit);
-        }
-    }
+
 }

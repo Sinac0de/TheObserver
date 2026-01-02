@@ -67,7 +67,7 @@ public class ConsoleInteractable : Interactable
             Invoke(nameof(LoadNextRoom), activationDelay);
         }
     }
-
+    
     private void LoadNextRoom()
     {
         if (RoomManager.Instance != null)

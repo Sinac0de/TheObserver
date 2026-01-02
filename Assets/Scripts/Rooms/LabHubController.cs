@@ -75,13 +75,12 @@ public class LabHubController : BaseRoomController
             return;
         }
         
-        Debug.Log("Player entering elevator. Loading elevator room...");
+        Debug.Log("Player entering elevator. Loading first floor...");
         
         if (RoomManager.Instance != null)
         {
-            // For now, we'll load the elevator as a special room type
-            // In the actual implementation, this might be handled differently
-            RoomManager.Instance.LoadNextRoom(); // This will load the elevator room
+            // Load the first floor directly
+            RoomManager.Instance.LoadSpecificRoom(RoomManager.RoomType.Maze);
         }
     }
 

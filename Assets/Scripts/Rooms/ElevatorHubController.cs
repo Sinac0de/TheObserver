@@ -55,24 +55,17 @@ public class ElevatorHubController : BaseRoomController
     
     private void UpdateFloorAvailability()
     {
-        // Floor 1 (Maze) is always available at start
-        floorsUnlocked[0] = true;
+        // Update button availability based on current progress
+        int currentProgress = GameManager.Instance.RoomsCompleted;
         
-        // Floor 2 (Horror) after completing Maze Floor
-        floorsUnlocked[1] = GameManager.Instance.RoomsCompleted >= 1;
-        
-        // Floor 3 (Boss) after completing Horror Floor
-        floorsUnlocked[2] = GameManager.Instance.RoomsCompleted >= 2;
-        
-        // Update button availability - only show NEXT available floor
         if (floor1Button != null)
-            floor1Button.GetComponent<Collider>().enabled = floorsUnlocked[0] && GameManager.Instance.RoomsCompleted == 0;
+            floor1Button.GetComponent<Collider>().enabled = (currentProgress == 0);
             
         if (floor2Button != null)
-            floor2Button.GetComponent<Collider>().enabled = floorsUnlocked[1] && GameManager.Instance.RoomsCompleted == 1;
+            floor2Button.GetComponent<Collider>().enabled = (currentProgress == 1);
             
         if (floor3Button != null)
-            floor3Button.GetComponent<Collider>().enabled = floorsUnlocked[2] && GameManager.Instance.RoomsCompleted == 2;
+            floor3Button.GetComponent<Collider>().enabled = (currentProgress == 2);
     }
     
     public void GoToFloor(int floorNumber)

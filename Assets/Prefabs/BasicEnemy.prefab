@@ -244,7 +244,7 @@ GameObject:
   - component: {fileID: 2523697088536518650}
   - component: {fileID: 2523697088536518644}
   m_Layer: 0
-  m_Name: RandomModularRobots_Prefab
+  m_Name: BasicEnemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
