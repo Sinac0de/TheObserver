@@ -1236,7 +1236,7 @@ MonoBehaviour:
   labHubPrefab: {fileID: 0}
   puzzleRoomPrefabs: []
   horrorRoomPrefabs: []
-  bossRoomPrefab: {fileID: 0}
+  bossRoomPrefabs: []
   roomsRoot: {fileID: 0}
 --- !u!4 &980820427
 Transform:
@@ -1317,14 +1317,26 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 131166929}
+    - target: {fileID: 2057598197679629440, guid: 8b90e968749eec645b8a819b7af37cd3, type: 3}
+      propertyPath: m_VersionIndex
+      value: 5183
+      objectReference: {fileID: 0}
     - target: {fileID: 2238744476721183977, guid: 8b90e968749eec645b8a819b7af37cd3, type: 3}
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 1992233661}
+    - target: {fileID: 2238744476721183977, guid: 8b90e968749eec645b8a819b7af37cd3, type: 3}
+      propertyPath: m_VersionIndex
+      value: 2720
+      objectReference: {fileID: 0}
     - target: {fileID: 3230776241107310006, guid: 8b90e968749eec645b8a819b7af37cd3, type: 3}
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 1537479064}
+    - target: {fileID: 3230776241107310006, guid: 8b90e968749eec645b8a819b7af37cd3, type: 3}
+      propertyPath: m_VersionIndex
+      value: 5183
+      objectReference: {fileID: 0}
     - target: {fileID: 3284892784183817827, guid: 8b90e968749eec645b8a819b7af37cd3, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -1333,6 +1345,10 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 16552899}
+    - target: {fileID: 3351290325133161499, guid: 8b90e968749eec645b8a819b7af37cd3, type: 3}
+      propertyPath: m_VersionIndex
+      value: 5183
+      objectReference: {fileID: 0}
     - target: {fileID: 3834899548942939019, guid: 8b90e968749eec645b8a819b7af37cd3, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -1345,6 +1361,10 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 225241689}
+    - target: {fileID: 4147328664994773107, guid: 8b90e968749eec645b8a819b7af37cd3, type: 3}
+      propertyPath: m_VersionIndex
+      value: 76
+      objectReference: {fileID: 0}
     - target: {fileID: 4529287565443230817, guid: 8b90e968749eec645b8a819b7af37cd3, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -1373,6 +1393,10 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 1526398193}
+    - target: {fileID: 7666206871550249727, guid: 8b90e968749eec645b8a819b7af37cd3, type: 3}
+      propertyPath: m_VersionIndex
+      value: 5183
+      objectReference: {fileID: 0}
     - target: {fileID: 8050074215937924443, guid: 8b90e968749eec645b8a819b7af37cd3, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -2510,10 +2534,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c400b20d5426cda45833984716735fb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInteractor
-  maxInteractDistance: 3
-  interactMask:
+  interactionDistance: 3
+  interactionLayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
+  interactKey: 101
+  highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  highlightIntensity: 1.5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
