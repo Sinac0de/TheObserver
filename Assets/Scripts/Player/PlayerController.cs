@@ -65,6 +65,8 @@ public class PlayerController : MonoBehaviour {
     }
 
     private void Update() {
+        if (!controller.enabled) return;  // skip movement when controller is disabled
+
         HandleInput();
         GroundCheck();
         JumpBuffering();
@@ -281,4 +283,34 @@ public class PlayerController : MonoBehaviour {
             isAttemptingToStand = true;
         }
     }
+
+    /// <summary>
+    /// Resets movement-related state when respawning (e.g. in elevator).
+    /// </summary>
+    public void ResetMovementState() {
+        moveVelocity = Vector3.zero;
+        smoothVelocity = Vector3.zero;
+        verticalVelocity = -2f; // small downward vel so controller stays grounded
+        isSprinting = false;
+        isMoving = false;
+    }
+
+    public void TeleportTo(Vector3 position, Quaternion rotation) {
+        StartCoroutine(TeleportRoutine(position, rotation));
+    }
+
+    private System.Collections.IEnumerator TeleportRoutine(Vector3 position, Quaternion rotation) {
+        var cc = GetComponent<CharacterController>();
+        if (cc != null) cc.enabled = false;
+
+        transform.SetPositionAndRotation(position, rotation);
+
+        ResetMovementState();
+        ForceStandUp();
+
+        yield return null; // wait 1 frame
+
+        if (cc != null) cc.enabled = true;
+    }
+
 }

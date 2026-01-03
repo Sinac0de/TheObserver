@@ -8,11 +8,12 @@ public class FloorElevatorController : MonoBehaviour {
     [Header("References")]
     public Animator doorAnimator;
     public MazeRoomController mazeRoom; // For Floor1 only; use Horror/Boss for other floors
+    [SerializeField] Transform playerSpawnPosition;
 
     private bool roomStarted;
 
     private void Start() {
-        // At scene start the player should already be inside this elevator
+        // Player should already be inside this elevator when the scene starts
         OpenDoor();
         roomStarted = false;
     }
@@ -35,27 +36,28 @@ public class FloorElevatorController : MonoBehaviour {
         roomStarted = false;
         OpenDoor();
 
-        // Place the player inside the elevator
-        player.position = transform.position;
-        player.rotation = transform.rotation;
-
         var pc = player.GetComponent<PlayerController>();
         if (pc != null) {
-            pc.ForceStandUp();
+            pc.TeleportTo(playerSpawnPosition.transform.position, playerSpawnPosition.transform.rotation);
+        } else {
+            // Fallback: simple teleport if no PlayerController
+            player.position = playerSpawnPosition.transform.position;
+            player.rotation = playerSpawnPosition.transform.rotation;
         }
 
         Debug.Log("[Elevator] Player respawned in elevator on floor " + floorIndex);
     }
 
+
     private void OpenDoor() {
         if (doorAnimator != null) {
-            doorAnimator.SetBool("IsDoorOpen", true);
+            doorAnimator.SetBool("Open", true);
         }
     }
 
     private void CloseDoor() {
         if (doorAnimator != null) {
-            doorAnimator.SetBool("IsDoorOpen", false);
+            doorAnimator.SetBool("Open", false);
         }
     }
 }

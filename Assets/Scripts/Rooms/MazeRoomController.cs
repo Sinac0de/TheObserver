@@ -24,9 +24,15 @@ public class MazeRoomController : MonoBehaviour {
     }
 
     private void Start() {
-        // At scene start the room is idle; player is in the elevator
+        // Room is idle; player is in the elevator
         isRunning = false;
         remainingTime = 0f;
+
+        // Generate the maze ONCE when the scene loads, using current AI difficulty
+        ApplyAIDifficulty();
+        if (mazeGenerator != null) {
+            mazeGenerator.GenerateMaze();
+        }
     }
 
     private void Update() {
@@ -41,26 +47,16 @@ public class MazeRoomController : MonoBehaviour {
 
     /// <summary>
     /// Called by FloorElevatorController when the player exits the elevator.
-    /// This is where the maze actually begins.
+    /// Starts the timer and metrics; does NOT regenerate the maze.
     /// </summary>
     public void StartRoom() {
         if (isRunning) return;
 
-        // 1) Apply AI-driven difficulty
-        ApplyAIDifficulty();
-
-        // 2) Generate a new maze
-        if (mazeGenerator != null) {
-            mazeGenerator.GenerateMaze(); // Make GenerateMaze() public
-        }
-
-        // 3) Initialize timer and metrics
         mistakes = 0;
         roomStartTime = Time.time;
 
         float timeLimit = baseTimeLimit;
         if (aiModel != null) {
-            // Example: slightly adjust time limit based on complexity
             float c = aiModel.CurrentComplexity; // 0..1
             timeLimit = Mathf.Lerp(baseTimeLimit * 1.2f, baseTimeLimit * 0.8f, c);
         }
@@ -77,7 +73,6 @@ public class MazeRoomController : MonoBehaviour {
         float c = aiModel.CurrentComplexity; // 0..1
 
         // Example mapping from complexity to hazard density
-        // Ensure these fields are public or have setters on MazeGenerator
         mazeGenerator.enemyDensityOnPath = Mathf.Lerp(0.02f, 0.08f, c);
         mazeGenerator.trapDensityOnPath = Mathf.Lerp(0.03f, 0.10f, c);
     }
@@ -144,9 +139,11 @@ public class MazeRoomController : MonoBehaviour {
 
         Debug.Log("[MazeRoom] FAIL in " + solveTime + "s, mistakes: " + mistakes);
 
-        // Later this will call DeathFlow and fade; for now respawn in the same elevator
         if (elevator != null && playerTransform != null) {
+            Debug.Log("[MazeRoom] Calling elevator.RespawnPlayerInElevator");
             elevator.RespawnPlayerInElevator(playerTransform);
+        } else {
+            Debug.LogWarning("[MazeRoom] Missing elevator or playerTransform reference");
         }
     }
 
