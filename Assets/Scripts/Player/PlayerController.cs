@@ -62,7 +62,12 @@ public class PlayerController : MonoBehaviour {
         controller = GetComponent<CharacterController>();
         controller.slopeLimit = slopeLimit;
         cameraController = GetComponentInChildren<FPSCameraController>();
+
+        // Ensure we start in a stable grounded state (no initial pop)
+        verticalVelocity = -2f;
     }
+
+
 
     private void Update() {
         if (!controller.enabled) return;  // skip movement when controller is disabled
