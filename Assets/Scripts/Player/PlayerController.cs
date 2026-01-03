@@ -100,24 +100,24 @@ public class PlayerController : MonoBehaviour {
     private bool CanJump()
     {
         // Check if current room restricts jumping
-        if (currentRoom is HorrorRoomController)
-        {
-            return false; // Horror rooms disable jumping
-        }
+        //if (currentRoom is HorrorRoomController)
+        //{
+        //    return false; // Horror rooms disable jumping
+        //}
         return true;
     }
     
     private bool CanCrouch()
     {
         // Check if current room restricts crouching
-        if (currentRoom is HorrorRoomController)
-        {
-            return false; // Horror rooms disable crouching
-        }
+        //if (currentRoom is HorrorRoomController)
+        //{
+        //    return false; // Horror rooms disable crouching
+        //}
         return true;
     }
     
-    private IRoom currentRoom; // Reference to current room for restrictions
+    //private IRoom currentRoom; // Reference to current room for restrictions
 
     private void GroundCheck() {
         bool grounded = controller.isGrounded;
@@ -308,24 +308,14 @@ public class PlayerController : MonoBehaviour {
         transform.position += Vector3.up * (heightDifference / 2f);
     }
 
-    private void OnEnable() {
-        // Subscribe to room events
-        RoomManager.Instance.OnRoomLoaded += OnRoomEntered;
-        RoomManager.Instance.OnTransitionStarted += OnTransitionStart;
-    }
 
-    private void OnDisable() {
-        RoomManager.Instance.OnRoomLoaded -= OnRoomEntered;
-        RoomManager.Instance.OnTransitionStarted -= OnTransitionStart;
-    }
-
-    private void OnRoomEntered(IRoom room) {
-        // Set current room reference
-        currentRoom = room;
+    //private void OnRoomEntered(IRoom room) {
+    //    // Set current room reference
+    //    currentRoom = room;
         
-        // Room-specific player constraints are handled by input methods
-        // Jump/crouch restrictions are applied at input time
-    }
+    //    // Room-specific player constraints are handled by input methods
+    //    // Jump/crouch restrictions are applied at input time
+    //}
     
     private void EnableAllMovement() {
         // Ensure all movement is enabled in maze/boss rooms

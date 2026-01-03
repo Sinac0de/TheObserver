@@ -248,7 +248,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 356
+  m_VersionIndex: 377
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -368,7 +368,6 @@ GameObject:
   - component: {fileID: 7084726072193467335}
   - component: {fileID: 738886102323209144}
   - component: {fileID: 4095028519234575899}
-  - component: {fileID: 3673834296375376919}
   m_Layer: 0
   m_Name: Floor3Button
   m_TagString: Untagged
@@ -470,30 +469,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &3673834296375376919
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 863815334691843499}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0947dcfc6e90e414f8e75ff4cb9036ea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ConsoleInteractable
-  prompt: Interact
-  interactionRange: 3
-  interactionLayerMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  consolePrompt: Start Next Trial
-  activationDelay: 1
-  activationParticles: {fileID: 0}
-  consoleLight: {fileID: 0}
-  activationSound: {fileID: 0}
-  isFloorSelector: 1
-  floorNumber: 3
 --- !u!1 &1085835922954584264
 GameObject:
   m_ObjectHideFlags: 0
@@ -742,7 +717,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 356
+  m_VersionIndex: 377
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -862,7 +837,6 @@ GameObject:
   - component: {fileID: 8534057163069061355}
   - component: {fileID: 823665793902452969}
   - component: {fileID: 9055912528519881608}
-  - component: {fileID: 4529750315178148132}
   m_Layer: 0
   m_Name: 'Floor2Button '
   m_TagString: Untagged
@@ -964,30 +938,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &4529750315178148132
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1398255947378457162}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0947dcfc6e90e414f8e75ff4cb9036ea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ConsoleInteractable
-  prompt: Interact
-  interactionRange: 3
-  interactionLayerMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  consolePrompt: Start Next Trial
-  activationDelay: 1
-  activationParticles: {fileID: 0}
-  consoleLight: {fileID: 0}
-  activationSound: {fileID: 0}
-  isFloorSelector: 1
-  floorNumber: 2
 --- !u!1 &1714078283746830172
 GameObject:
   m_ObjectHideFlags: 0
@@ -997,7 +947,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 166467643221871180}
-  - component: {fileID: 6831268602924190747}
   m_Layer: 0
   m_Name: ElevatorHub
   m_TagString: Untagged
@@ -1028,29 +977,6 @@ Transform:
   - {fileID: 4868509874290593516}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
---- !u!114 &6831268602924190747
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1714078283746830172}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e6ab06d091b68174d89234ca976fe4c4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ElevatorHubController
-  currentState: 0
-  roomStartTime: 0
-  mistakes: 0
-  detections: 0
-  floor1Button: {fileID: 6932585051645474373}
-  floor2Button: {fileID: 4529750315178148132}
-  floor3Button: {fileID: 3673834296375376919}
-  doorAnimator: {fileID: 582946038599113345}
-  mazeFloorPrefab: {fileID: 0}
-  horrorFloorPrefab: {fileID: 0}
-  bossFloorPrefab: {fileID: 0}
 --- !u!1 &1803184872459693495
 GameObject:
   m_ObjectHideFlags: 0
@@ -1596,7 +1522,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 246
+  m_VersionIndex: 267
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -1952,7 +1878,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 301
+  m_VersionIndex: 322
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -3219,7 +3145,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 261
+  m_VersionIndex: 282
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -3578,7 +3504,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 177
+  m_VersionIndex: 198
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -3696,7 +3622,7 @@ Animator:
   m_GameObject: {fileID: 5102457377562171517}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 198aa559e2948ff48a2d46b03a5ba76b, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -4288,7 +4214,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 101
+  m_VersionIndex: 122
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -4953,7 +4879,6 @@ GameObject:
   - component: {fileID: 7017296286728352214}
   - component: {fileID: 1324571751000753780}
   - component: {fileID: 3167165970336927426}
-  - component: {fileID: 6932585051645474373}
   m_Layer: 0
   m_Name: Floor1Button
   m_TagString: Untagged
@@ -5055,27 +4980,3 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &6932585051645474373
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8880654272938968468}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0947dcfc6e90e414f8e75ff4cb9036ea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ConsoleInteractable
-  prompt: Interact
-  interactionRange: 3
-  interactionLayerMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  consolePrompt: Start Next Trial
-  activationDelay: 1
-  activationParticles: {fileID: 0}
-  consoleLight: {fileID: 0}
-  activationSound: {fileID: 0}
-  isFloorSelector: 1
-  floorNumber: 1
