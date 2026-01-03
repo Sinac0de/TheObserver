@@ -124,28 +124,41 @@ public class MazeRoomController : MonoBehaviour {
             detections = 0
         };
 
-        if (aiModel != null) {
-            aiModel.RegisterRoomResult(
-                success: false,
-                solveTimeSeconds: metrics.solveTimeSeconds,
-                mistakes: metrics.mistakes,
-                detections: metrics.detections
-            );
-        }
-
-        if (GameManager.Instance != null) {
-            GameManager.Instance.RegisterDeath();
-        }
-
         Debug.Log("[MazeRoom] FAIL in " + solveTime + "s, mistakes: " + mistakes);
 
-        if (elevator != null && playerTransform != null) {
-            Debug.Log("[MazeRoom] Calling elevator.RespawnPlayerInElevator");
-            elevator.RespawnPlayerInElevator(playerTransform);
+        // Use DeathFlowController to handle AI + respawn logic
+        if (DeathFlowController.Instance != null && elevator != null && playerTransform != null) {
+            DeathFlowController.Instance.HandleRoomFail(
+                RoomType.Maze,
+                metrics,
+                onAfterAIUpdatedAndBeforeRespawn: () => {
+                    // Here later you will choose and queue an Observer message
+                    // and eventually trigger black-screen UI
+                },
+                onRespawn: () => {
+                    elevator.RespawnPlayerInElevator(playerTransform);
+                }
+            );
         } else {
-            Debug.LogWarning("[MazeRoom] Missing elevator or playerTransform reference");
+            // Fallback: just respawn if DeathFlow is missing
+            if (GameManager.Instance != null) {
+                GameManager.Instance.RegisterDeath();
+            }
+            if (GameManager.Instance != null && GameManager.Instance.AIModel != null) {
+                GameManager.Instance.AIModel.RegisterRoomResult(
+                    success: false,
+                    solveTimeSeconds: metrics.solveTimeSeconds,
+                    mistakes: metrics.mistakes,
+                    detections: metrics.detections
+                );
+            }
+
+            if (elevator != null && playerTransform != null) {
+                elevator.RespawnPlayerInElevator(playerTransform);
+            }
         }
     }
+
 
     /// <summary>
     /// Called by hazards (enemies, traps) when player triggers them.
