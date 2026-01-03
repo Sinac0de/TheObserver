@@ -27,8 +27,8 @@ public class MazeGenerator : MonoBehaviour {
     [Header("Enemies & Traps")]
     [SerializeField] private GameObject[] enemyPrefabs;
     [SerializeField] private GameObject[] trapPrefabs;
-    [SerializeField, Range(0f, 1f)] private float enemyDensityOnPath = 0.04f; // 4% of path cells
-    [SerializeField, Range(0f, 1f)] private float trapDensityOnPath = 0.05f;  // 5% of path cells
+    [SerializeField, Range(0f, 1f)] public float enemyDensityOnPath = 0.04f; // 4% of path cells
+    [SerializeField, Range(0f, 1f)] public float trapDensityOnPath = 0.05f;  // 5% of path cells
     [SerializeField] private float minCellSpacingBetweenHazards = 3f;          // World distance
 
     private class MazeCell {
@@ -76,7 +76,7 @@ public class MazeGenerator : MonoBehaviour {
     /// <summary>
     /// Main entry to generate a new maze.
     /// </summary>
-    private void GenerateMaze() {
+    public void GenerateMaze() {
         ClearMaze();
         mainPathRenderer.positionCount = 0;
 
