@@ -1436,7 +1436,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3982776658796162072, guid: 30c6d760d2b5fa541a02c092d6cf1aa0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 863673927}
   m_SourcePrefab: {fileID: 100100000, guid: 30c6d760d2b5fa541a02c092d6cf1aa0, type: 3}
 --- !u!4 &586718076 stripped
 Transform:
@@ -2084,6 +2087,23 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!1 &863673923 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3982776658796162072, guid: 30c6d760d2b5fa541a02c092d6cf1aa0, type: 3}
+  m_PrefabInstance: {fileID: 511249882}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &863673927
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 863673923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc88bb57ef09db342a54e96e1dc5b7bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Player
 --- !u!43 &916882723
 Mesh:
   m_ObjectHideFlags: 0
@@ -3196,7 +3216,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31b6d582f5fa53647bfdcd9b112ce263, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DebugAIOverlay
-  aiModel: {fileID: 11400000, guid: a59dddf1e584f7445a5e61229358b1ed, type: 2}
+  aiModel: {fileID: 0}
   toggleKey: 282
   visible: 1
   backgroundColor: {r: 0, g: 0, b: 0, a: 0.6}

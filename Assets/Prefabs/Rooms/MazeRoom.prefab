@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5026321924124927871}
   - component: {fileID: 8100668726321094252}
+  - component: {fileID: 5083799339600720785}
   m_Layer: 0
   m_Name: MazeRoot
   m_TagString: Untagged
@@ -60,6 +61,23 @@ MonoBehaviour:
   enemyDensityOnPath: 0.04
   trapDensityOnPath: 0.05
   minCellSpacingBetweenHazards: 3
+--- !u!114 &5083799339600720785
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3612319799558543111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24e2d60a4b3f2ec48a125d6bf238abac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MazeRoomController
+  mazeGenerator: {fileID: 0}
+  elevator: {fileID: 0}
+  playerTransform: {fileID: 0}
+  baseTimeLimit: 120
+  mistakes: 0
 --- !u!1 &6209772638126422180
 GameObject:
   m_ObjectHideFlags: 0
@@ -155,6 +173,7 @@ Transform:
   - {fileID: 1548361644222323539}
   - {fileID: 2613204693681784928}
   - {fileID: 3138447582500111915}
+  - {fileID: 8713188697276740923}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8161945722384150878
@@ -458,3 +477,65 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!1001 &8837223021391839095
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 6612323426402843110}
+    m_Modifications:
+    - target: {fileID: 166467643221871180, guid: c66ad226e457b4a4194331e7367881f0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -5.4118
+      objectReference: {fileID: 0}
+    - target: {fileID: 166467643221871180, guid: c66ad226e457b4a4194331e7367881f0, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 166467643221871180, guid: c66ad226e457b4a4194331e7367881f0, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -37.35641
+      objectReference: {fileID: 0}
+    - target: {fileID: 166467643221871180, guid: c66ad226e457b4a4194331e7367881f0, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 166467643221871180, guid: c66ad226e457b4a4194331e7367881f0, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 166467643221871180, guid: c66ad226e457b4a4194331e7367881f0, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 166467643221871180, guid: c66ad226e457b4a4194331e7367881f0, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 166467643221871180, guid: c66ad226e457b4a4194331e7367881f0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 166467643221871180, guid: c66ad226e457b4a4194331e7367881f0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 180
+      objectReference: {fileID: 0}
+    - target: {fileID: 166467643221871180, guid: c66ad226e457b4a4194331e7367881f0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1714078283746830172, guid: c66ad226e457b4a4194331e7367881f0, type: 3}
+      propertyPath: m_Name
+      value: ElevatorHub
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: c66ad226e457b4a4194331e7367881f0, type: 3}
+--- !u!4 &8713188697276740923 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 166467643221871180, guid: c66ad226e457b4a4194331e7367881f0, type: 3}
+  m_PrefabInstance: {fileID: 8837223021391839095}
+  m_PrefabAsset: {fileID: 0}
