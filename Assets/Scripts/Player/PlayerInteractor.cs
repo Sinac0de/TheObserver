@@ -1,124 +1,124 @@
 using UnityEngine;
 
-public class PlayerInteractor : MonoBehaviour
-{
+public class PlayerInteractor : MonoBehaviour {
     [Header("Interaction Settings")]
-    public float interactionDistance = 3f;
-    public LayerMask interactionLayerMask = ~0;
-    public KeyCode interactKey = KeyCode.E;
-    
+    [SerializeField] private float interactionDistance = 3f;
+    [SerializeField] private LayerMask interactionLayerMask = ~0;
+
     [Header("Visual Feedback")]
-    public Color highlightColor = Color.yellow;
-    public float highlightIntensity = 1.5f;
-    
+    [SerializeField] private Color highlightColor = Color.yellow;
+    [SerializeField] private float highlightIntensity = 1.5f;
+
     private Interactable currentTarget;
     private Renderer currentHighlightRenderer;
-    private Material currentMaterial;
     private MaterialPropertyBlock propertyBlock;
-    
+
     private Camera playerCamera;
     private bool isInteractionEnabled = true;
 
-    private void Awake()
-    {
+    // Reused raycast hit to avoid extra allocations
+    private RaycastHit hitInfo;
+
+    private void Awake() {
+        // Cache camera reference once
         playerCamera = GetComponentInChildren<Camera>();
+        if (playerCamera == null) {
+            Debug.LogWarning("[PlayerInteractor] No Camera found in children. Please assign a Camera under the Player.");
+        }
+
         propertyBlock = new MaterialPropertyBlock();
-        
-        if (GameInputManager.Instance != null)
-        {
+
+        if (GameInputManager.Instance != null) {
             GameInputManager.Instance.OnInteract += HandleInteractInput;
+        } else {
+            Debug.LogWarning("[PlayerInteractor] GameInputManager.Instance is null in Awake.");
         }
     }
 
-    private void Update()
-    {
-        if (!isInteractionEnabled) return;
-        
-        CheckForInteractable();
-    }
-
-    private void CheckForInteractable()
-    {
-        // Clear previous highlight
+    private void OnDestroy() {
+        if (GameInputManager.Instance != null) {
+            GameInputManager.Instance.OnInteract -= HandleInteractInput;
+        }
         ClearHighlight();
-        
-        if (playerCamera == null) return;
-        
+    }
+
+    private void Update() {
+        if (!isInteractionEnabled || playerCamera == null)
+            return;
+
+        ScanForInteractable();
+    }
+
+    /// <summary>
+    /// Optional external setup if you want to override the auto-found camera.
+    /// </summary>
+    public void SetCamera(Camera cam) {
+        playerCamera = cam;
+    }
+
+    private void ScanForInteractable() {
+        // Start from camera forward
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
-        RaycastHit hit;
-        
-        // Visual debug ray
-        Debug.DrawRay(ray.origin, ray.direction * interactionDistance, Color.red, 0.1f);
-        
-        if (Physics.Raycast(ray, out hit, interactionDistance, interactionLayerMask))
-        {
-            Interactable interactable = hit.collider.GetComponent<Interactable>();
-            if (interactable != null)
-            {
+
+        // Clear previous highlight by default
+        ClearHighlight();
+
+        if (Physics.Raycast(ray, out hitInfo, interactionDistance, interactionLayerMask, QueryTriggerInteraction.Ignore)) {
+            var interactable = hitInfo.collider.GetComponent<Interactable>();
+            if (interactable != null) {
                 currentTarget = interactable;
-                HighlightTarget(hit.collider);
-
-                // Show interaction prompt in UI (TODO: Add UI system)
-                // Debug.Log($"Press [{interactKey}] to {interactable.prompt}");
-                Debug.DrawRay(ray.origin, ray.direction * interactionDistance, Color.green, 0.1f);
-
+                ApplyHighlight(hitInfo.collider);
+            } else {
+                currentTarget = null;
             }
-        }
-        else
-        {
-            Debug.DrawRay(ray.origin, ray.direction * interactionDistance, Color.yellow, 0.1f);
-
+        } else {
             currentTarget = null;
         }
     }
 
-    private void HighlightTarget(Collider targetCollider)
-    {
+    private void ApplyHighlight(Collider targetCollider) {
+        // Try to get a Renderer either on this collider or its parent
         Renderer renderer = targetCollider.GetComponent<Renderer>();
-        if (renderer != null)
-        {
-            currentHighlightRenderer = renderer;
-            currentMaterial = renderer.material;
-            
-            // Apply highlight effect
-            propertyBlock.SetColor("_EmissionColor", highlightColor * highlightIntensity);
-            renderer.SetPropertyBlock(propertyBlock);
+        if (renderer == null) {
+            renderer = targetCollider.GetComponentInParent<Renderer>();
         }
+
+        if (renderer == null)
+            return;
+
+        currentHighlightRenderer = renderer;
+
+        // Apply emission highlight via MaterialPropertyBlock
+        propertyBlock.Clear();
+        propertyBlock.SetColor("_EmissionColor", highlightColor * highlightIntensity);
+        renderer.SetPropertyBlock(propertyBlock);
     }
 
-    private void ClearHighlight()
-    {
-        if (currentHighlightRenderer != null)
-        {
+    private void ClearHighlight() {
+        if (currentHighlightRenderer != null) {
             currentHighlightRenderer.SetPropertyBlock(null);
             currentHighlightRenderer = null;
         }
-        currentTarget = null;
     }
 
-    private void HandleInteractInput()
-    {
-        if (currentTarget != null && isInteractionEnabled)
-        {
+    private void HandleInteractInput() {
+        if (!isInteractionEnabled)
+            return;
+
+        if (currentTarget != null) {
             currentTarget.Interact(gameObject);
         }
     }
 
-    public void EnableInteraction(bool enable)
-    {
+    /// <summary>
+    /// Enables or disables interaction scanning and highlighting.
+    /// </summary>
+    public void EnableInteraction(bool enable) {
         isInteractionEnabled = enable;
-        if (!enable)
-        {
-            ClearHighlight();
-        }
-    }
 
-    private void OnDestroy()
-    {
-        if (GameInputManager.Instance != null)
-        {
-            GameInputManager.Instance.OnInteract -= HandleInteractInput;
+        if (!enable) {
+            ClearHighlight();
+            currentTarget = null;
         }
-        ClearHighlight();
     }
 }
