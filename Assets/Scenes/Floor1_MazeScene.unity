@@ -373,6 +373,9 @@ MonoBehaviour:
   wallMask:
     serializedVersion: 2
     m_Bits: 256
+  navmeshMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
   mainPathWorldPoints: []
   mainPathVisible: 1
   togglePathKey: 282
@@ -5177,6 +5180,11 @@ PrefabInstance:
       propertyPath: playerViewOrigin
       value: 
       objectReference: {fileID: 417868650}
+    - target: {fileID: 8100668726321094252, guid: 7e91b5628ad95fb4a87a99baed4c5735,
+        type: 3}
+      propertyPath: navmeshMask.m_Bits
+      value: 4294967295
+      objectReference: {fileID: 0}
     - target: {fileID: 8100668726321094252, guid: 7e91b5628ad95fb4a87a99baed4c5735,
         type: 3}
       propertyPath: trapPrefabs.Array.size

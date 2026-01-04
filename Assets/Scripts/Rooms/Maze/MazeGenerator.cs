@@ -42,6 +42,7 @@ public class MazeGenerator : MonoBehaviour {
     [Header("Navigation / Vision")]
     [SerializeField] private NavMeshSurface navSurface;
     [SerializeField] private LayerMask wallMask = ~0; // Walls/obstacles for line-of-sight checks
+    [SerializeField] private LayerMask navmeshMask = ~0; // Layers to include in NavMesh generation
 
 
     [Header("AI Debug / Patrol")]
@@ -125,6 +126,8 @@ public class MazeGenerator : MonoBehaviour {
         DrawMainPathAndHazards();
 
         if (navSurface != null) {
+            // Update NavMesh surface settings before building
+            navSurface.layerMask = navmeshMask;
             navSurface.BuildNavMesh();
         } else {
             Debug.LogWarning("MazeGenerator: NavSurface is not assigned, enemies will not have a NavMesh.");
