@@ -5,7 +5,7 @@ public class LabHubIntroController : MonoBehaviour {
 
     [Header("References")]
     [SerializeField] private Transform playerSpawn;
-    [SerializeField] private GameObject labElevator; // parent of elevator and console
+    [SerializeField] private GameObject labElevatorDoor; // elevator Door
     [SerializeField] private PlayerController playerController;
     [SerializeField] private PlayerInteractor playerInteractor;
     [SerializeField] private WeaponController weaponController;
@@ -26,8 +26,8 @@ public class LabHubIntroController : MonoBehaviour {
         SetPlayerControlEnabled(false);
 
         // Keep elevator doors closed initially (if you have an animator, do it there)
-        if (labElevator != null) {
-            var animator = labElevator.GetComponentInChildren<Animator>();
+        if (labElevatorDoor != null) {
+            var animator = labElevatorDoor.GetComponent<Animator>();
             if (animator != null) {
                 animator.SetBool(ANIMATION_PARAM_IS_DOOR_OPEN, false);
             }
@@ -44,8 +44,8 @@ public class LabHubIntroController : MonoBehaviour {
         SetPlayerControlEnabled(true);
 
         // Open elevator doors
-        if (labElevator != null) {
-            var animator = labElevator.GetComponentInChildren<Animator>();
+        if (labElevatorDoor != null) {
+            var animator = labElevatorDoor.GetComponent<Animator>();
             if (animator != null) {
                 animator.SetBool(ANIMATION_PARAM_IS_DOOR_OPEN, true);
             }
