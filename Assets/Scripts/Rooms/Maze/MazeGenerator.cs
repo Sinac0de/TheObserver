@@ -21,8 +21,8 @@ public class MazeGenerator : MonoBehaviour {
 
 
     [Header("Wall Size")]
-    [SerializeField] private float wallHeight = 4f;      
-    [SerializeField] private float wallThickness = 0.4f; 
+    [SerializeField] private float wallHeight = 4f;
+    [SerializeField] private float wallThickness = 0.4f;
 
     [Header("Controls")]
     [SerializeField] private KeyCode generateKey = KeyCode.F;
@@ -39,8 +39,10 @@ public class MazeGenerator : MonoBehaviour {
     [SerializeField, Range(0f, 1f)] public float trapDensityOnPath = 0.05f;
     [SerializeField] private float minCellSpacingBetweenHazards = 3f;
 
-    [Header("Navigation")]
+    [Header("Navigation / Vision")]
     [SerializeField] private NavMeshSurface navSurface;
+    [SerializeField] private LayerMask wallMask = ~0; // Walls/obstacles for line-of-sight checks
+
 
     [Header("AI Debug / Patrol")]
     public List<Vector3> mainPathWorldPoints = new();
@@ -127,8 +129,6 @@ public class MazeGenerator : MonoBehaviour {
         } else {
             Debug.LogWarning("MazeGenerator: NavSurface is not assigned, enemies will not have a NavMesh.");
         }
-
-        ConfigureEnemiesPatrolFromMainPath();
     }
 
     private Vector2Int WorldToCell(Vector3 worldPos) {
@@ -306,7 +306,7 @@ public class MazeGenerator : MonoBehaviour {
 
                 if (cell.wallN)
                     SpawnWall(
-                        cellPos + new Vector3(0f, wallHeight * 0.5f, cellSize * 0.5f),  
+                        cellPos + new Vector3(0f, wallHeight * 0.5f, cellSize * 0.5f),
                         new Vector3(cellSize, wallHeight, wallThickness)
                     );
 
@@ -394,6 +394,74 @@ public class MazeGenerator : MonoBehaviour {
 
         SpawnEnemiesAndTrapsOnMainPath(path);
     }
+
+
+
+    /// <summary>
+    /// Snap a world position to the center of the nearest maze cell.
+    /// </summary>
+    public Vector3 SnapToCellCenter(Vector3 worldPos) {
+        Vector3 local = worldPos - mazeRoot.position;
+
+        float originOffsetX = -(width * cellSize) * 0.5f;
+        float originOffsetZ = -(height * cellSize) * 0.5f;
+
+        float fx = (local.x - originOffsetX) / cellSize;
+        float fz = (local.z - originOffsetZ) / cellSize;
+
+        int cx = Mathf.RoundToInt(fx);
+        int cz = Mathf.RoundToInt(fz);
+
+        cx = Mathf.Clamp(cx, 0, width - 1);
+        cz = Mathf.Clamp(cz, 0, height - 1);
+
+        Vector3 center = mazeRoot.position
+                         - new Vector3(width * cellSize * 0.5f, 0f, height * cellSize * 0.5f)
+                         + new Vector3(cx * cellSize, 0f, cz * cellSize);
+
+        return new Vector3(center.x, worldPos.y, center.z);
+    }
+
+    /// <summary>
+    /// Returns centers of neighbor cells that are connected (no wall between)
+    /// AND have clear line of sight (no collider between them).
+    /// </summary>
+    public List<Vector3> GetVisibleNeighborCellCenters(Vector3 worldPos) {
+        List<Vector3> result = new();
+
+        Vector2Int cell = ClampCell(WorldToCell(worldPos));
+        var neighbors = GetNeighbors(cell);
+
+        Vector3 origin = mazeRoot.position - new Vector3(width * cellSize * 0.5f, 0f, height * cellSize * 0.5f);
+        Vector3 currentCenter = origin + new Vector3(cell.x * cellSize, 0f, cell.y * cellSize);
+
+        foreach (var n in neighbors) {
+            // Skip if there is a logical wall between cells in the maze graph
+            if (HasWallBetween(cell, n))
+                continue;
+
+            Vector3 neighborCenter = origin + new Vector3(n.x * cellSize, 0f, n.y * cellSize);
+
+            // Line-of-sight check: there must be no wall collider between centers
+            Vector3 dir = (neighborCenter - currentCenter).normalized;
+            float dist = Vector3.Distance(currentCenter, neighborCenter);
+
+            if (Physics.Raycast(currentCenter + Vector3.up * 0.5f,
+                                dir,
+                                dist - 0.1f,
+                                wallMask,
+                                QueryTriggerInteraction.Ignore)) {
+                // Something in wallMask is between the two cells (e.g. a wall)
+                continue;
+            }
+
+            result.Add(neighborCenter);
+        }
+
+        return result;
+    }
+
+
 
     private void SpawnEnemiesAndTrapsOnMainPath(List<Vector2Int> mainPath) {
         if ((enemyPrefabs == null || enemyPrefabs.Length == 0) &&
@@ -499,30 +567,6 @@ public class MazeGenerator : MonoBehaviour {
         return path;
     }
 
-    public void ConfigureEnemiesPatrolFromMainPath() {
-        if (spawnedEnemies.Count == 0 || mainPathWorldPoints.Count == 0)
-            return;
-
-        int step = Mathf.Max(1, mainPathWorldPoints.Count / 6);
-        var patrolPoints = mainPathWorldPoints.Where((p, i) => i % step == 0).ToList();
-
-        foreach (var enemyObj in spawnedEnemies) {
-            if (enemyObj == null) continue;
-
-            var ghost = enemyObj.GetComponent<MazeEnemy>();
-            if (ghost == null) continue;
-
-            Transform[] waypoints = new Transform[patrolPoints.Count];
-            for (int i = 0; i < patrolPoints.Count; i++) {
-                GameObject wp = new GameObject($"PatrolPoint_{i}");
-                wp.transform.SetParent(transform);
-                wp.transform.position = patrolPoints[i];
-                waypoints[i] = wp.transform;
-            }
-
-            ghost.SetPatrolPoints(waypoints);
-        }
-    }
 
     private void ClearMaze() {
         foreach (var w in spawnedWalls)
