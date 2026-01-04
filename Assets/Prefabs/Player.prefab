@@ -462,8 +462,7 @@ MonoBehaviour:
   interactionDistance: 3
   interactionLayerMask:
     serializedVersion: 2
-    m_Bits: 1
-  interactKey: 101
+    m_Bits: 4294967295
   highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   highlightIntensity: 1.5
 --- !u!1001 &6290741772656239093

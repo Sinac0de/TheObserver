@@ -28,11 +28,11 @@ public class PlayerInteractor : MonoBehaviour {
 
         propertyBlock = new MaterialPropertyBlock();
 
-        if (GameInputManager.Instance != null) {
+    }
+
+    private void Start() {
+
             GameInputManager.Instance.OnInteract += HandleInteractInput;
-        } else {
-            Debug.LogWarning("[PlayerInteractor] GameInputManager.Instance is null in Awake.");
-        }
     }
 
     private void OnDestroy() {
@@ -105,7 +105,10 @@ public class PlayerInteractor : MonoBehaviour {
         if (!isInteractionEnabled)
             return;
 
+
         if (currentTarget != null) {
+            Debug.Log("[currentTarget]");
+
             currentTarget.Interact(gameObject);
         }
     }
