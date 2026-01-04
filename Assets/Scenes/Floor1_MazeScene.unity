@@ -355,6 +355,8 @@ MonoBehaviour:
   pointB: {fileID: 655875590}
   wallPrefab: {fileID: 705581535702610403, guid: cd21ac2095328ff43b2308b8f34ef973,
     type: 3}
+  floorPrefab: {fileID: 705581535702610403, guid: b016ad3904f14144bb8841e9b372b4ec,
+    type: 3}
   mazeRoot: {fileID: 53030321}
   wallHeight: 4
   wallThickness: 1
@@ -375,7 +377,7 @@ MonoBehaviour:
     m_Bits: 256
   navmeshMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 384
   mainPathWorldPoints: []
   mainPathVisible: 1
   togglePathKey: 282
@@ -5183,7 +5185,7 @@ PrefabInstance:
     - target: {fileID: 8100668726321094252, guid: 7e91b5628ad95fb4a87a99baed4c5735,
         type: 3}
       propertyPath: navmeshMask.m_Bits
-      value: 4294967295
+      value: 384
       objectReference: {fileID: 0}
     - target: {fileID: 8100668726321094252, guid: 7e91b5628ad95fb4a87a99baed4c5735,
         type: 3}

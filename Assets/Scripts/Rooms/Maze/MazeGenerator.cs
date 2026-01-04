@@ -17,6 +17,7 @@ public class MazeGenerator : MonoBehaviour {
 
     [Header("Visuals")]
     [SerializeField] private GameObject wallPrefab;
+    [SerializeField] private GameObject floorPrefab;
     [SerializeField] private Transform mazeRoot;
 
 
@@ -122,15 +123,25 @@ public class MazeGenerator : MonoBehaviour {
         PrimsFill(startCell);
         OpenEntranceExit(startCell, endCell);
         BuildWalls();
+        BuildFloor();
         SpawnProps();
         DrawMainPathAndHazards();
 
         if (navSurface != null) {
             // Update NavMesh surface settings before building
             navSurface.layerMask = navmeshMask;
-            navSurface.BuildNavMesh();
+            
+            // Force a small delay to ensure all objects are properly positioned
+            // before NavMesh baking to prevent fragmentation issues
+            Invoke(nameof(BakeNavMesh), 0.05f);
         } else {
             Debug.LogWarning("MazeGenerator: NavSurface is not assigned, enemies will not have a NavMesh.");
+        }
+    }
+    
+    private void BakeNavMesh() {
+        if (navSurface != null) {
+            navSurface.BuildNavMesh();
         }
     }
 
@@ -338,7 +349,31 @@ public class MazeGenerator : MonoBehaviour {
     private void SpawnWall(Vector3 pos, Vector3 scale) {
         GameObject w = Instantiate(wallPrefab, pos, Quaternion.identity, mazeRoot);
         w.transform.localScale = scale;
+        
+        // Ensure the wall is static for proper NavMesh baking
+        w.isStatic = true;
+        
         spawnedWalls.Add(w);
+    }
+
+    private void BuildFloor() {
+        if (!floorPrefab || !mazeRoot) {
+            Debug.LogError("FloorPrefab or MazeRoot is not assigned!");
+            return;
+        }
+
+        // Create a single large floor that covers the entire maze area
+        Vector3 floorPosition = mazeRoot.position + new Vector3(0f, -0.1f, 0f); // Slightly below the maze root to ensure proper placement
+        Vector3 floorScale = new Vector3(width * cellSize, 0.1f, height * cellSize);
+        
+        GameObject floor = Instantiate(floorPrefab, floorPosition, Quaternion.identity, mazeRoot);
+        floor.transform.localScale = floorScale;
+        
+        // Name the floor object for easy identification
+        floor.name = "MazeFloor";
+        
+        // Ensure the floor is static for proper NavMesh baking
+        floor.isStatic = true;
     }
 
     private void SpawnProps() {
