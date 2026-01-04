@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 3515684279482443818}
   - component: {fileID: 7083152700055022498}
   - component: {fileID: 2398756688532409540}
-  m_Layer: 0
-  m_Name: WallPrefab
+  m_Layer: 7
+  m_Name: MazeWallPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -2121,7 +2121,8 @@ PrefabInstance:
       propertyPath: interactionLayerMask.m_Bits
       value: 64
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 8225799423397901950, guid: 30c6d760d2b5fa541a02c092d6cf1aa0, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

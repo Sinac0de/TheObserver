@@ -2,6 +2,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
 public class FloorElevatorController : MonoBehaviour {
+    private const string ANIMATOR_PARAM_IS_DOOR_OPEN = "IsDoorOpen";
     [Header("Floor Index (1=Maze,2=Horror,3=Boss)")]
     public int floorIndex = 1;
 
@@ -36,6 +37,12 @@ public class FloorElevatorController : MonoBehaviour {
         roomStarted = false;
         OpenDoor();
 
+        var health = player.GetComponent<PlayerHealth>();
+        if (health != null) {
+            health.ResetHealth();
+        }
+
+
         var pc = player.GetComponent<PlayerController>();
         if (pc != null) {
             pc.TeleportTo(playerSpawnPosition.transform.position, playerSpawnPosition.transform.rotation);
@@ -51,13 +58,13 @@ public class FloorElevatorController : MonoBehaviour {
 
     private void OpenDoor() {
         if (doorAnimator != null) {
-            doorAnimator.SetBool("Open", true);
+            doorAnimator.SetBool(ANIMATOR_PARAM_IS_DOOR_OPEN, true);
         }
     }
 
     private void CloseDoor() {
         if (doorAnimator != null) {
-            doorAnimator.SetBool("Open", false);
+            doorAnimator.SetBool(ANIMATOR_PARAM_IS_DOOR_OPEN, false);
         }
     }
 }
