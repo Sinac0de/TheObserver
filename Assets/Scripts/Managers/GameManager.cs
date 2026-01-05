@@ -1,14 +1,14 @@
 using UnityEngine;
 
 /// <summary>
-/// Global game coordinator for The Observer.
+/// Global game coordinator for THE MAZE.
 /// Holds references to core systems and the AIObserverModel.
 /// </summary>
 public class GameManager : MonoBehaviour {
     public static GameManager Instance { get; private set; }
 
     [Header("AI")]
-    [SerializeField] private AIModel aiModel;          // Assign AIObserverModel in Inspector
+    [SerializeField] private AIModel aiModel; // Assign AIObserverModel asset in Inspector
 
     [Header("Progress")]
     [SerializeField] private int roomsCompleted;
@@ -37,22 +37,20 @@ public class GameManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Called by RoomManager when a room is fully completed (success).
+    /// Called when a maze run is successfully completed.
     /// </summary>
     public void RegisterRoomCompleted(int scoreGain = 100) {
         roomsCompleted++;
         currentRunScore += scoreGain;
-        
-        // Check win condition
-        if (roomsCompleted >= 3)
-        {
-            Debug.Log("PLAYER WINS! All 3 rooms completed.");
-            // TODO: Trigger win sequence/escape
+
+        if (roomsCompleted >= 3) {
+            Debug.Log("PLAYER WINS! All 3 maze runs completed.");
+            // TODO: Trigger final escape sequence / ending.
         }
     }
 
     /// <summary>
-    /// Called by RoomManager when the player dies/fails.
+    /// Called when the player dies or fails a run.
     /// </summary>
     public void RegisterDeath(int scorePenalty = 0) {
         deaths++;
@@ -60,7 +58,7 @@ public class GameManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Call this when starting a fresh run from the Lab Hub.
+    /// Call this when starting a fresh run.
     /// </summary>
     public void ResetRun() {
         roomsCompleted = 0;
