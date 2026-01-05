@@ -16,15 +16,27 @@ MonoBehaviour:
   minComplexity: 0.1
   maxComplexity: 1
   adaptationLerpSpeed: 0.2
-  solveTimeWeight: 0.5
-  mistakesWeight: 0.3
-  detectionWeight: 0.2
-  targetSolveTime: 60
-  targetMistakes: 2
-  targetDetections: 1
+  solveTimeWeight: 0.3
+  mistakesWeight: 0.2
+  enemyEncountersWeight: 0.2
+  movementSpeedWeight: 0.15
+  standingStillWeight: 0.15
+  targetSolveTime: 300
+  targetMistakes: 3
+  targetEnemyEncounters: 2
+  targetStandingStillTime: 30
+  targetMovementSpeed: 0.6
   currentComplexity: 0.3
+  skillScore: 0.5
+  riskProfile: 0.5
+  fearBias: 0.5
   totalRoomsCompleted: 0
   totalFailures: 0
-  lastRoomSolveTime: 0
-  lastRoomMistakes: 0
-  lastRoomDetections: 0
+  totalDeaths: 0
+  totalTimeouts: 0
+  lastRunSolveTime: 0
+  lastRunMistakes: 0
+  lastRunEnemyEncounters: 0
+  lastRunMovementSpeed: 0
+  lastRunStandingStillTime: 0
+  lastRunSuccess: 0

@@ -200,13 +200,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MazeEnemy
   wanderInterval: 1.5
   viewRadius: 10
-  viewAngle: 360
+  viewAngle: 50
   obstacleMask:
     serializedVersion: 2
     m_Bits: 256
   loseSightTime: 2
   chaseSpeed: 6
   patrolSpeed: 4
+  enableTeleport: 1
+  minTeleportDistanceFromPlayer: 10
+  maxTeleportDistanceFromPlayer: 35
   showGizmos: 1
 --- !u!195 &4891882505000619792
 NavMeshAgent:

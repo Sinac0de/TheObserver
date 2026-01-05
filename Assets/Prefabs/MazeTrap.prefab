@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 628381870241519542}
   - component: {fileID: -1349023197000616765}
   - component: {fileID: -8508198358808533046}
+  - component: {fileID: 3604396634347701665}
   m_Layer: 0
   m_Name: MazeTrap
   m_TagString: Untagged
@@ -120,8 +121,41 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1421036914569721443}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7db9aedaf5813a0438570d544c4c3dd2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MazeTrap
+--- !u!114 &3604396634347701665
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1421036914569721443}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4529948677d055c48acb909d0fd966e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PressurePlateTrap
+  prompt: Interact
+  interactionRange: 3
+  interactionLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  damageAmount: 25
+  triggerCooldown: 2
+  canTriggerMultipleTimes: 1
+  triggerFlashlightFlicker: 1
+  flashlightFlickerDuration: 0.5
+  causeCameraShake: 1
+  cameraShakeIntensity: 0.5
+  cameraShakeDuration: 0.3
+  detectionRadius: 1
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 1
+  plateRenderer: {fileID: 628381870241519542}
+  normalColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  triggeredColor: {r: 1, g: 0, b: 0, a: 1}
+  triggerAnimationDuration: 0.2
