@@ -55,6 +55,11 @@ public class PlayerController : MonoBehaviour {
     private Vector3 lastPosition = Vector3.zero;
     private PlayerHealth playerHealth;
     
+    [Header("Intro State")]
+    private bool isIntroSequence = false;
+    private bool canMoveDuringIntro = false;
+    private bool canLookDuringIntro = true;
+    
     public float MovementSpeedTracker => movementSpeedTracker;
     public float StandingStillTime => standingStillTime;
 
@@ -120,8 +125,44 @@ public class PlayerController : MonoBehaviour {
         lastPosition = transform.position;
         lastMovementTime = Time.time;
     }
+    
+    // Add methods to handle intro state
+    public void SetIntroState(bool introState)
+    {
+        isIntroSequence = introState;
+        if (introState)
+        {
+            // Disable movement initially during intro
+            canMoveDuringIntro = false;
+            canLookDuringIntro = true; // Always allow looking during intro
+        }
+        else
+        {
+            // Enable full controls after intro
+            canMoveDuringIntro = true;
+            canLookDuringIntro = true;
+        }
+    }
+
+    public void SetIntroMovementState(bool canMove)
+    {
+        canMoveDuringIntro = canMove;
+    }
+
+    public void SetIntroLookState(bool canLook)
+    {
+        canLookDuringIntro = canLook;
+    }
 
     private void HandleInput() {
+        if (isIntroSequence)
+        {
+            // Handle intro-specific input restrictions
+            HandleIntroInput();
+            return;
+        }
+
+        // Original input handling for normal gameplay
         moveInput = GameInputManager.Instance.GetMoveVector();
         lookInput = GameInputManager.Instance.GetLookVector();
 
@@ -143,6 +184,45 @@ public class PlayerController : MonoBehaviour {
             ToggleCrouch();
         } else if (!crouchInput) {
             isCrouchPressed = false;
+        }
+    }
+    
+    private void HandleIntroInput()
+    {
+        if (canLookDuringIntro)
+        {
+            lookInput = GameInputManager.Instance.GetLookVector();
+        }
+        else
+        {
+            lookInput = Vector2.zero;
+        }
+
+        if (canMoveDuringIntro)
+        {
+            moveInput = GameInputManager.Instance.GetMoveVector();
+            isSprinting = GameInputManager.Instance.GetSprintInput() && moveInput.magnitude > 0.1f;
+
+            // Jump input during intro
+            if (GameInputManager.Instance.IsJumpPressed()) {
+                lastJumpPressTime = Time.time;
+                GameInputManager.Instance.ConsumeJumpPress();
+            }
+
+            // Crouch input during intro
+            bool crouchInput = GameInputManager.Instance.GetCrouchInput();
+            if (crouchInput && !isCrouchPressed) {
+                isCrouchPressed = true;
+                lastCrouchPressTime = Time.time;
+                ToggleCrouch();
+            } else if (!crouchInput) {
+                isCrouchPressed = false;
+            }
+        }
+        else
+        {
+            moveInput = Vector2.zero;
+            isSprinting = false;
         }
     }
 
