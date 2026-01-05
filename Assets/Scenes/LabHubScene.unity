@@ -1107,7 +1107,6 @@ MonoBehaviour:
   labElevatorDoor: {fileID: 1489513743}
   playerController: {fileID: 863673928}
   playerInteractor: {fileID: 1460376611}
-  weaponController: {fileID: 0}
   introDuration: 3
 --- !u!1001 &3913608619915624626
 PrefabInstance:
@@ -1190,7 +1189,7 @@ PrefabInstance:
     - target: {fileID: 8112127526432177717, guid: 97d674825b27dfa4e974645b9c781178,
         type: 3}
       propertyPath: m_VersionIndex
-      value: 6072
+      value: 6075
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

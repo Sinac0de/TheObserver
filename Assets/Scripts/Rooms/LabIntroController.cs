@@ -8,7 +8,6 @@ public class LabHubIntroController : MonoBehaviour {
     [SerializeField] private GameObject labElevatorDoor; // elevator Door
     [SerializeField] private PlayerController playerController;
     [SerializeField] private PlayerInteractor playerInteractor;
-    [SerializeField] private WeaponController weaponController;
 
     [Header("Intro Settings")]
     [SerializeField] private float introDuration = 3f;
@@ -60,8 +59,5 @@ public class LabHubIntroController : MonoBehaviour {
 
         if (playerInteractor != null)
             playerInteractor.EnableInteraction(enabled);
-
-        if (weaponController != null)
-            weaponController.enabled = enabled;
     }
 }

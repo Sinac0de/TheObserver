@@ -55,9 +55,6 @@ public class PlayerController : MonoBehaviour {
     private float targetHeight;
     private float lastCrouchPressTime;
 
-    // current room constraints (set by RoomController)
-    private IRoomConstraints currentConstraints;
-
     private void Awake() {
         controller = GetComponent<CharacterController>();
         controller.slopeLimit = slopeLimit;
@@ -89,34 +86,22 @@ public class PlayerController : MonoBehaviour {
         bool sprintAllowed = true; 
         isSprinting = sprintAllowed && GameInputManager.Instance.GetSprintInput() && moveInput.magnitude > 0.1f;
 
-        // Jump input: only if room allows
-        if (GameInputManager.Instance.IsJumpPressed() && CanJump()) {
+        // Jump input
+        if (GameInputManager.Instance.IsJumpPressed()) {
             lastJumpPressTime = Time.time;
             GameInputManager.Instance.ConsumeJumpPress();
         }
 
-        // Crouch input: toggle if room allows
+        // Crouch input
         bool crouchInput = GameInputManager.Instance.GetCrouchInput();
 
-        if (crouchInput && !isCrouchPressed && CanCrouch()) {
+        if (crouchInput && !isCrouchPressed) {
             isCrouchPressed = true;
             lastCrouchPressTime = Time.time;
             ToggleCrouch();
         } else if (!crouchInput) {
             isCrouchPressed = false;
         }
-    }
-
-    private bool CanJump() {
-        if (currentConstraints != null && !currentConstraints.AllowJump)
-            return false;
-        return true;
-    }
-
-    private bool CanCrouch() {
-        if (currentConstraints != null && !currentConstraints.AllowCrouch)
-            return false;
-        return true;
     }
 
     private void GroundCheck() {
@@ -277,9 +262,6 @@ public class PlayerController : MonoBehaviour {
 
     // --- Public APIs ---
 
-    public void SetRoomConstraints(IRoomConstraints constraints) {
-        currentConstraints = constraints;
-    }
 
     public void ForceStandUp() {
         // standing up in elevator or other forced scenarios

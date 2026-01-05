@@ -4106,11 +4106,7 @@ PrefabInstance:
     - {fileID: 884374718240626563, guid: 0aa37b6666ba4d642921aa823a3add65, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 1506910234391846274, guid: 0aa37b6666ba4d642921aa823a3add65,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 523129538286168844}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0aa37b6666ba4d642921aa823a3add65, type: 3}
 --- !u!4 &408263851416869909 stripped
 Transform:
@@ -4118,27 +4114,3 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 5116308652731445797}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &6046462120932093863 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1506910234391846274, guid: 0aa37b6666ba4d642921aa823a3add65,
-    type: 3}
-  m_PrefabInstance: {fileID: 5116308652731445797}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &523129538286168844
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6046462120932093863}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 798f15931fe1e404091b1bd5786c5cc4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LabElevatorConsole
-  prompt: Interact
-  interactionRange: 3
-  interactionLayerMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  floor1SceneName: Floor1_MazeScene
