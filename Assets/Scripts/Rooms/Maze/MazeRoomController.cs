@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 public class MazeRoomController : MonoBehaviour {
     [Header("References")]
@@ -7,26 +8,61 @@ public class MazeRoomController : MonoBehaviour {
     [SerializeField] private Transform playerTransform;
 
     [Header("Timer")]
-    [SerializeField] private float baseTimeLimit = 120f;
-    private float remainingTime;
+    [SerializeField] private float baseTimeLimit = 300f; // 5 minutes for the new GDD
     private bool isRunning;
 
     [Header("Metrics")]
     [SerializeField] private int mistakes;
     private float roomStartTime;
 
+    [Header("AI Observer")]
+    [SerializeField] private string[] observerDeathMessages;
+    [SerializeField] private string[] observerTimeoutMessages;
+    
+    [Header("Events")]
+    public UnityEvent<float> onTimeUpdate;
+    public UnityEvent onTimeOut;
+    public UnityEvent onPlayerDeath;
+    
     private AIModel aiModel;
+    private TimerManager timerManager;
 
     private void Awake() {
         if (GameManager.Instance != null) {
             aiModel = GameManager.Instance.AIModel;
         }
+        
+        // Create timer manager if not exists
+        if (timerManager == null) {
+            GameObject timerObj = new GameObject("TimerManager");
+            timerObj.transform.SetParent(transform);
+            timerManager = timerObj.AddComponent<TimerManager>();
+            SetupTimerEvents();
+        }
+    }
+    
+    private void SetupTimerEvents() {
+        if (timerManager != null) {
+            timerManager.onTimeUpdate.AddListener((time) => onTimeUpdate?.Invoke(time));
+            timerManager.onTimeWarning.AddListener(OnTimeWarning);
+            timerManager.onTimeCritical.AddListener(OnTimeCritical);
+            timerManager.onTimeOut.AddListener(OnTimeOut);
+        }
+    }
+    
+    private void OnTimeWarning() {
+        Debug.Log("[MazeRoom] Time warning triggered!");
+        // Add warning effects here (audio, visual, etc.)
+    }
+    
+    private void OnTimeCritical() {
+        Debug.Log("[MazeRoom] Time critical!");
+        // Add critical time effects here (audio, visual, etc.)
     }
 
     private void Start() {
         // Room is idle; player is in the elevator
         isRunning = false;
-        remainingTime = 0f;
 
         // Generate the maze ONCE when the scene loads, using current AI difficulty
         ApplyAIDifficulty();
@@ -35,13 +71,40 @@ public class MazeRoomController : MonoBehaviour {
         }
     }
 
-    private void Update() {
+    private void OnTimeOut() {
         if (!isRunning) return;
 
-        remainingTime -= Time.deltaTime;
-        if (remainingTime <= 0f) {
-            remainingTime = 0f;
-            Fail();
+        isRunning = false;
+        float solveTime = Time.time - roomStartTime;
+
+        RoomMetrics metrics = new RoomMetrics {
+            roomType = RoomType.Maze,
+            solveTimeSeconds = solveTime,
+            mistakes = mistakes,
+            detections = 0
+        };
+
+        Debug.Log("[MazeRoom] TIMEOUT in " + solveTime + "s, mistakes: " + mistakes);
+        
+        // Handle timeout similar to failure but with different AI feedback
+        HandleTimeout(metrics);
+    }
+    
+    private void HandleTimeout(RoomMetrics metrics) {
+        if (DeathFlowController.Instance != null && elevator != null && playerTransform != null) {
+            DeathFlowController.Instance.HandleRoomFail(
+                RoomType.Maze,
+                metrics,
+                onAfterAIUpdatedAndBeforeRespawn: () => {
+                    // Play timeout-specific message via ObserverManager
+                    if (ObserverManager.Instance != null) {
+                        ObserverManager.Instance.PlayTimeoutMessage();
+                    }
+                },
+                onRespawn: () => {
+                    elevator.RespawnPlayerInElevator(playerTransform);
+                }
+            );
         }
     }
 
@@ -60,8 +123,9 @@ public class MazeRoomController : MonoBehaviour {
             float c = aiModel.CurrentComplexity; // 0..1
             timeLimit = Mathf.Lerp(baseTimeLimit * 1.2f, baseTimeLimit * 0.8f, c);
         }
-
-        remainingTime = timeLimit;
+        
+        timerManager.SetTimeLimit(timeLimit);
+        timerManager.StartTimer();
         isRunning = true;
 
         Debug.Log("[MazeRoom] Room started with time limit: " + timeLimit);
@@ -83,6 +147,7 @@ public class MazeRoomController : MonoBehaviour {
     public void Success() {
         if (!isRunning) return;
 
+        timerManager.StopTimer();
         isRunning = false;
         float solveTime = Time.time - roomStartTime;
 
@@ -114,6 +179,7 @@ public class MazeRoomController : MonoBehaviour {
     public void Fail() {
         if (!isRunning) return;
 
+        timerManager.StopTimer();
         isRunning = false;
         float solveTime = Time.time - roomStartTime;
 
@@ -132,8 +198,10 @@ public class MazeRoomController : MonoBehaviour {
                 RoomType.Maze,
                 metrics,
                 onAfterAIUpdatedAndBeforeRespawn: () => {
-                    // Here later you will choose and queue an Observer message
-                    // and eventually trigger black-screen UI
+                    // Play death-specific message via ObserverManager
+                    if (ObserverManager.Instance != null) {
+                        ObserverManager.Instance.PlayDeathMessage();
+                    }
                 },
                 onRespawn: () => {
                     elevator.RespawnPlayerInElevator(playerTransform);
@@ -166,4 +234,14 @@ public class MazeRoomController : MonoBehaviour {
     public void RegisterMistake() {
         mistakes++;
     }
+    
+    /// <summary>
+    /// Called when the player dies to register death and trigger fail sequence.
+    /// </summary>
+    public void RegisterPlayerDeath() {
+        onPlayerDeath?.Invoke();
+        Fail();
+    }
+    
+
 }
