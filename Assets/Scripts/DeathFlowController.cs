@@ -47,10 +47,17 @@ public class DeathFlowController : MonoBehaviour {
             Debug.Log($"[DeathFlow] Room fail recorded. Type={roomType}, time={metrics.solveTimeSeconds}, mistakes={metrics.mistakes}, detections={metrics.detections}");
         }
 
-        // 3) Optional hook: e.g. choose Observer message, etc.
+        // 3) Play Observer message before respawn
+        if (ObserverManager.Instance != null) {
+            // For now, we'll assume it's always a death message since timeout is handled separately
+            // In a full implementation, we'd pass information about the type of failure
+            ObserverManager.Instance.PlayDeathMessage();
+        }
+        
+        // 4) Optional hook: e.g. choose additional Observer message, etc.
         onAfterAIUpdatedAndBeforeRespawn?.Invoke();
 
-        // 4) Respawn callback (e.g. put player back into elevator)
+        // 5) Respawn callback (e.g. put player back into elevator)
         onRespawn?.Invoke();
     }
 }

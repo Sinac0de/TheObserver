@@ -9,6 +9,10 @@ public class PlayerHealth : MonoBehaviour {
     private bool isImmune;
 
     public MazeRoomController currentMazeRoom;
+    
+    // Properties to expose health values
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => maxHealth;
 
     private void Start() {
         currentHealth = maxHealth;
@@ -44,7 +48,7 @@ public class PlayerHealth : MonoBehaviour {
     private void OnDeath() {
         if (currentMazeRoom != null) {
             currentMazeRoom.RegisterMistake();
-            currentMazeRoom.Fail();
+            currentMazeRoom.RegisterPlayerDeath();
         } else {
             Debug.LogWarning("[PlayerHealth] Died but no MazeRoomController assigned.");
         }
