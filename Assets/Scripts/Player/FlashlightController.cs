@@ -53,22 +53,19 @@ public class FlashlightController : MonoBehaviour
 
     private void DrainBattery()
     {
-        float drainRate = batteryDrainRate * Time.deltaTime;
-        
-        // If using focused beam (shift key), drain faster
-        if (GameInputManager.Instance != null && GameInputManager.Instance.GetSprintInput())
-        {
-            drainRate *= focusedBeamDrainMultiplier;
+        if (MazeRoomController.Instance.GetIsRunning()) {
+            float drainRate = batteryDrainRate * Time.deltaTime;
+
+
+            currentBattery = Mathf.Clamp(currentBattery - drainRate, 0f, maxBattery);
+
+            if (currentBattery <= 0f) {
+                TurnOff();
+            }
+
+            UpdateFlashlightState();
         }
         
-        currentBattery = Mathf.Clamp(currentBattery - drainRate, 0f, maxBattery);
-        
-        if (currentBattery <= 0f)
-        {
-            TurnOff();
-        }
-        
-        UpdateFlashlightState();
     }
 
     private void UpdateFlashlightState()

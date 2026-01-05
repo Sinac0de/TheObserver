@@ -13,6 +13,21 @@ public class PlayerHealth : MonoBehaviour {
     // Properties to expose health values
     public int CurrentHealth => currentHealth;
     public int MaxHealth => maxHealth;
+    
+    // Metrics for AI analysis
+    private int enemyEncounters = 0;
+    private float movementSpeedTracker = 0f;
+    private float standingStillTime = 0f;
+    private float lastPositionUpdate = 0f;
+    private Vector3 lastPosition = Vector3.zero;
+    
+    public int EnemyEncounters => enemyEncounters;
+    public float MovementSpeedTracker => movementSpeedTracker;
+    public float StandingStillTime => standingStillTime;
+    
+    public void RegisterEnemyEncounter() {
+        enemyEncounters++;
+    }
 
     private void Start() {
         currentHealth = maxHealth;

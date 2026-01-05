@@ -1,116 +1,118 @@
 using UnityEngine;
 using UnityEngine.Events;
 
+/// <summary>
+/// Controls a single maze run:
+/// - Starts/stops timer
+/// - Tracks mistakes
+/// - Notifies AIModel about run result
+/// - Handles success / failure / timeout flow
+/// </summary>
 public class MazeRoomController : MonoBehaviour {
+    public static MazeRoomController Instance {  get; private set; }
+
     [Header("References")]
     [SerializeField] private MazeGenerator mazeGenerator;
-    [SerializeField] private FloorElevatorController elevator;   // entry elevator for this floor
+    [SerializeField] private FloorElevatorController elevator;
     [SerializeField] private Transform playerTransform;
 
     [Header("Timer")]
-    [SerializeField] private float baseTimeLimit = 300f; // 5 minutes for the new GDD
+    [SerializeField] private float baseTimeLimit = 300f; // 5 minutes
     private bool isRunning;
 
     [Header("Metrics")]
     [SerializeField] private int mistakes;
     private float roomStartTime;
 
-    [Header("AI Observer")]
+    [Header("Observer Messages")]
     [SerializeField] private string[] observerDeathMessages;
     [SerializeField] private string[] observerTimeoutMessages;
-    
+
     [Header("Events")]
     public UnityEvent<float> onTimeUpdate;
     public UnityEvent onTimeOut;
     public UnityEvent onPlayerDeath;
-    
+
     private AIModel aiModel;
-    private TimerManager timerManager;
 
     private void Awake() {
         if (GameManager.Instance != null) {
             aiModel = GameManager.Instance.AIModel;
         }
-        
-        // Create timer manager if not exists
-        if (timerManager == null) {
-            GameObject timerObj = new GameObject("TimerManager");
-            timerObj.transform.SetParent(transform);
-            timerManager = timerObj.AddComponent<TimerManager>();
-            SetupTimerEvents();
+
+        if (Instance != null) {
+            Destroy(Instance);
         }
+
+        Instance = this;
+
+        SetupTimerEvents();
     }
-    
+
     private void SetupTimerEvents() {
-        if (timerManager != null) {
-            timerManager.onTimeUpdate.AddListener((time) => onTimeUpdate?.Invoke(time));
-            timerManager.onTimeWarning.AddListener(OnTimeWarning);
-            timerManager.onTimeCritical.AddListener(OnTimeCritical);
-            timerManager.onTimeOut.AddListener(OnTimeOut);
+        if (TimerManager.Instance != null) {
+            TimerManager.Instance.onTimeUpdate.AddListener(time => onTimeUpdate?.Invoke(time));
+            TimerManager.Instance.onTimeWarning.AddListener(OnTimeWarning);
+            TimerManager.Instance.onTimeCritical.AddListener(OnTimeCritical);
+            TimerManager.Instance.onTimeOut.AddListener(OnTimeOut);
         }
     }
-    
+
     private void OnTimeWarning() {
         Debug.Log("[MazeRoom] Time warning triggered!");
-        // Add warning effects here (audio, visual, etc.)
+        // TODO: visual/audio cue for warning
     }
-    
+
     private void OnTimeCritical() {
         Debug.Log("[MazeRoom] Time critical!");
-        // Add critical time effects here (audio, visual, etc.)
+        // TODO: visual/audio cue for critical time
     }
 
     private void Start() {
-        // Room is idle; player is in the elevator
         isRunning = false;
 
-        // Generate the maze ONCE when the scene loads, using current AI difficulty
         ApplyAIDifficulty();
         if (mazeGenerator != null) {
             mazeGenerator.GenerateMaze();
         }
     }
 
+    /// <summary>
+    /// Called by TimerManager when time reaches zero.
+    /// </summary>
     private void OnTimeOut() {
         if (!isRunning) return;
 
         isRunning = false;
         float solveTime = Time.time - roomStartTime;
 
-        RoomMetrics metrics = new RoomMetrics {
-            roomType = RoomType.Maze,
-            solveTimeSeconds = solveTime,
-            mistakes = mistakes,
-            detections = 0
-        };
+        RunMetrics runMetrics = BuildRunMetrics(solveTime, mistakes);
 
-        Debug.Log("[MazeRoom] TIMEOUT in " + solveTime + "s, mistakes: " + mistakes);
-        
-        // Handle timeout similar to failure but with different AI feedback
-        HandleTimeout(metrics);
-    }
-    
-    private void HandleTimeout(RoomMetrics metrics) {
-        if (DeathFlowController.Instance != null && elevator != null && playerTransform != null) {
-            DeathFlowController.Instance.HandleRoomFail(
-                RoomType.Maze,
-                metrics,
-                onAfterAIUpdatedAndBeforeRespawn: () => {
-                    // Play timeout-specific message via ObserverManager
-                    if (ObserverManager.Instance != null) {
-                        ObserverManager.Instance.PlayTimeoutMessage();
-                    }
-                },
-                onRespawn: () => {
-                    elevator.RespawnPlayerInElevator(playerTransform);
-                }
-            );
+        Debug.Log($"[MazeRoom] TIMEOUT in {solveTime:F1}s, mistakes: {mistakes}");
+
+        GameManager.Instance?.AIModel?.RegisterRunResult(RunResult.Timeout, runMetrics);
+        GameManager.Instance?.RegisterDeath(); // if you treat timeout as a failed run
+
+        // Observer line for timeout (if any)
+        if (ObserverManager.Instance != null) {
+            ObserverManager.Instance.PlayTimeoutMessage();
         }
+
+        // Example behavior: mutate/regenerate maze in-place, then restart timer
+        if (mazeGenerator != null) {
+            mazeGenerator.GenerateMaze();
+        }
+
+        float timeLimit = GetTimeLimitFromAI();
+        TimerManager.Instance.SetTimeLimit(timeLimit);
+        TimerManager.Instance.StartTimer();
+        isRunning = true;
+        roomStartTime = Time.time;
+        mistakes = 0;
     }
 
     /// <summary>
-    /// Called by FloorElevatorController when the player exits the elevator.
-    /// Starts the timer and metrics; does NOT regenerate the maze.
+    /// Called when the player exits the elevator and the run officially begins.
     /// </summary>
     public void StartRoom() {
         if (isRunning) return;
@@ -118,130 +120,121 @@ public class MazeRoomController : MonoBehaviour {
         mistakes = 0;
         roomStartTime = Time.time;
 
-        float timeLimit = baseTimeLimit;
-        if (aiModel != null) {
-            float c = aiModel.CurrentComplexity; // 0..1
-            timeLimit = Mathf.Lerp(baseTimeLimit * 1.2f, baseTimeLimit * 0.8f, c);
-        }
-        
-        timerManager.SetTimeLimit(timeLimit);
-        timerManager.StartTimer();
+        float timeLimit = GetTimeLimitFromAI();
+
+        TimerManager.Instance.SetTimeLimit(timeLimit);
+        TimerManager.Instance.StartTimer();
         isRunning = true;
 
         Debug.Log("[MazeRoom] Room started with time limit: " + timeLimit);
     }
 
+    private float GetTimeLimitFromAI() {
+        float timeLimit = baseTimeLimit;
+        if (aiModel != null) {
+            float c = aiModel.CurrentComplexity; // 0..1
+            // Slightly more time for low complexity, slightly less for high
+            timeLimit = Mathf.Lerp(baseTimeLimit * 1.2f, baseTimeLimit * 0.8f, c);
+        }
+        return timeLimit;
+    }
+
     private void ApplyAIDifficulty() {
         if (aiModel == null || mazeGenerator == null) return;
 
-        float c = aiModel.CurrentComplexity; // 0..1
-
-        // Example mapping from complexity to hazard density
-        mazeGenerator.enemyDensityOnPath = Mathf.Lerp(0.02f, 0.08f, c);
-        mazeGenerator.trapDensityOnPath = Mathf.Lerp(0.03f, 0.10f, c);
+        mazeGenerator.ApplyAIDifficulty();
     }
 
     /// <summary>
-    /// Called by the exit elevator when the player reaches it.
+    /// Called when the player reaches the maze exit.
     /// </summary>
     public void Success() {
         if (!isRunning) return;
 
-        timerManager.StopTimer();
+        TimerManager.Instance.StopTimer();
         isRunning = false;
         float solveTime = Time.time - roomStartTime;
 
-        RoomMetrics metrics = new RoomMetrics {
-            roomType = RoomType.Maze,
-            solveTimeSeconds = solveTime,
-            mistakes = mistakes,
-            detections = 0
-        };
+        RunMetrics runMetrics = BuildRunMetrics(solveTime, mistakes);
+        GameManager.Instance?.AIModel?.RegisterRunResult(RunResult.Success, runMetrics);
+        GameManager.Instance?.RegisterRoomCompleted();
 
-        if (aiModel != null) {
-            aiModel.RegisterRoomResult(
-                success: true,
-                solveTimeSeconds: metrics.solveTimeSeconds,
-                mistakes: metrics.mistakes,
-                detections: metrics.detections
-            );
-        }
+        Debug.Log($"[MazeRoom] SUCCESS in {solveTime:F1}s, mistakes: {mistakes}");
 
-        if (GameManager.Instance != null) {
-            GameManager.Instance.RegisterRoomCompleted();
-        }
-
-        Debug.Log("[MazeRoom] SUCCESS in " + solveTime + "s, mistakes: " + mistakes);
-
-        // TODO: trigger transition to the next floor / inter-floor elevator
+        // TODO: trigger final escape sequence / ending
     }
 
+    /// <summary>
+    /// Called when the player dies (enemy or lethal trap).
+    /// </summary>
     public void Fail() {
         if (!isRunning) return;
 
-        timerManager.StopTimer();
+        TimerManager.Instance.StopTimer();
         isRunning = false;
         float solveTime = Time.time - roomStartTime;
 
-        RoomMetrics metrics = new RoomMetrics {
-            roomType = RoomType.Maze,
-            solveTimeSeconds = solveTime,
-            mistakes = mistakes,
-            detections = 0
-        };
+        RunMetrics runMetrics = BuildRunMetrics(solveTime, mistakes);
 
-        Debug.Log("[MazeRoom] FAIL in " + solveTime + "s, mistakes: " + mistakes);
+        Debug.Log($"[MazeRoom] FAIL in {solveTime:F1}s, mistakes: {mistakes}");
 
-        // Use DeathFlowController to handle AI + respawn logic
+        GameManager.Instance?.AIModel?.RegisterRunResult(RunResult.Death, runMetrics);
+        GameManager.Instance?.RegisterDeath();
+
+        // Use DeathFlowController if present, otherwise fallback to simple respawn
         if (DeathFlowController.Instance != null && elevator != null && playerTransform != null) {
+  
             DeathFlowController.Instance.HandleRoomFail(
-                RoomType.Maze,
-                metrics,
+                runMetrics,
                 onAfterAIUpdatedAndBeforeRespawn: () => {
-                    // Play death-specific message via ObserverManager
-                    if (ObserverManager.Instance != null) {
-                        ObserverManager.Instance.PlayDeathMessage();
-                    }
+                    ObserverManager.Instance?.PlayDeathMessage();
                 },
                 onRespawn: () => {
                     elevator.RespawnPlayerInElevator(playerTransform);
+                    TimerManager.Instance.ResetTimer();
                 }
             );
         } else {
-            // Fallback: just respawn if DeathFlow is missing
-            if (GameManager.Instance != null) {
-                GameManager.Instance.RegisterDeath();
-            }
-            if (GameManager.Instance != null && GameManager.Instance.AIModel != null) {
-                GameManager.Instance.AIModel.RegisterRoomResult(
-                    success: false,
-                    solveTimeSeconds: metrics.solveTimeSeconds,
-                    mistakes: metrics.mistakes,
-                    detections: metrics.detections
-                );
-            }
-
             if (elevator != null && playerTransform != null) {
                 elevator.RespawnPlayerInElevator(playerTransform);
             }
         }
+
     }
 
-
     /// <summary>
-    /// Called by hazards (enemies, traps) when player triggers them.
+    /// Called by hazards when the player triggers them (trap, non-lethal scare etc.).
     /// </summary>
     public void RegisterMistake() {
         mistakes++;
     }
-    
+
     /// <summary>
-    /// Called when the player dies to register death and trigger fail sequence.
+    /// Called by PlayerHealth when the player actually dies.
     /// </summary>
     public void RegisterPlayerDeath() {
         onPlayerDeath?.Invoke();
         Fail();
     }
-    
 
+    /// <summary>
+    /// Collects RunMetrics from player components to feed AIModel.
+    /// </summary>
+    private RunMetrics BuildRunMetrics(float solveTime, int mistakesCount) {
+        PlayerHealth playerHealth = FindObjectOfType<PlayerHealth>();
+        PlayerController playerController = FindObjectOfType<PlayerController>();
+
+        return new RunMetrics {
+            solveTimeSeconds = solveTime,
+            mistakes = mistakesCount,
+            enemyEncounters = playerHealth?.EnemyEncounters ?? 0,
+            movementSpeed = playerController?.MovementSpeedTracker ?? 0.5f,
+            standingStillTime = playerController?.StandingStillTime ?? 0f
+        };
+    }
+
+
+    public bool GetIsRunning() {
+        return isRunning;
+    }
 }

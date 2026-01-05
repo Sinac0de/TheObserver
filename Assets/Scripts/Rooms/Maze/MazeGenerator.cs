@@ -1,10 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
 
+/// <summary>
+/// Generates a grid-based maze and spawns walls, floor, props, enemies and traps.
+/// Uses AIModel to adjust branching, enemy density and trap density,
+/// but does NOT change the overall maze size (width/height).
+/// </summary>
 public class MazeGenerator : MonoBehaviour {
     [Header("Grid Settings")]
     [SerializeField] private int width = 50;
@@ -19,7 +23,6 @@ public class MazeGenerator : MonoBehaviour {
     [SerializeField] private GameObject wallPrefab;
     [SerializeField] private GameObject floorPrefab;
     [SerializeField] private Transform mazeRoot;
-
 
     [Header("Wall Size")]
     [SerializeField] private float wallHeight = 4f;
@@ -40,14 +43,21 @@ public class MazeGenerator : MonoBehaviour {
     [SerializeField, Range(0f, 1f)] public float trapDensityOnPath = 0.05f;
     [SerializeField] private float minCellSpacingBetweenHazards = 3f;
 
+    [Header("AI Generation Parameters")]
+    [SerializeField] private float mazeSizeMultiplier = 1f; // Kept for future use, but not applied to width/height
+    [SerializeField] private float branchingFactor = 0.3f;
+    [SerializeField] private int minEnemyCount = 1;
+    [SerializeField] private int maxEnemyCount = 5;
+
     [Header("Navigation / Vision")]
     [SerializeField] private NavMeshSurface navSurface;
-    [SerializeField] private LayerMask wallMask = ~0; // Walls/obstacles for line-of-sight checks
-    [SerializeField] private LayerMask navmeshMask = ~0; // Layers to include in NavMesh generation
+    [SerializeField] private LayerMask wallMask = ~0;
+    [SerializeField] private LayerMask navmeshMask = ~0;
 
-
-    [Header("AI Debug / Patrol")]
+    [Header("Main Path Debug")]
     public List<Vector3> mainPathWorldPoints = new();
+    [SerializeField] private bool mainPathVisible = true;
+    [SerializeField] private KeyCode togglePathKey = KeyCode.F1;
 
     private class MazeCell {
         public bool wallN = true;
@@ -63,15 +73,9 @@ public class MazeGenerator : MonoBehaviour {
     private readonly List<GameObject> spawnedTraps = new();
 
     private System.Random rng = new System.Random();
-
     private Vector2Int startCell;
     private Vector2Int endCell;
-
     private LineRenderer mainPathRenderer;
-
-    [Header("Debug Path")]
-    [SerializeField] private bool mainPathVisible = true;
-    [SerializeField] private KeyCode togglePathKey = KeyCode.F1;
 
     private void Awake() {
         mainPathRenderer = GetComponent<LineRenderer>();
@@ -104,10 +108,15 @@ public class MazeGenerator : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Generates a new maze with current AI-driven parameters (branching, hazards).
+    /// </summary>
     public void GenerateMaze() {
         ClearMaze();
         mainPathRenderer.positionCount = 0;
         mainPathWorldPoints.Clear();
+
+        ApplyAIDifficulty();
 
         cells = new MazeCell[width, height];
         for (int x = 0; x < width; x++)
@@ -128,17 +137,40 @@ public class MazeGenerator : MonoBehaviour {
         DrawMainPathAndHazards();
 
         if (navSurface != null) {
-            // Update NavMesh surface settings before building
             navSurface.layerMask = navmeshMask;
-            
-            // Force a small delay to ensure all objects are properly positioned
-            // before NavMesh baking to prevent fragmentation issues
             Invoke(nameof(BakeNavMesh), 0.05f);
         } else {
             Debug.LogWarning("MazeGenerator: NavSurface is not assigned, enemies will not have a NavMesh.");
         }
     }
-    
+
+    /// <summary>
+    /// Reads AIModel and adjusts branching factor, enemy/trap density and enemy counts.
+    /// This keeps the maze size fixed but changes how dangerous it feels.
+    /// </summary>
+    public void ApplyAIDifficulty() {
+        AIModel aiModel = GameManager.Instance?.AIModel;
+        if (aiModel == null) return;
+
+        float complexity = aiModel.CurrentComplexity;
+        float enemyAgg = aiModel.EnemyAggressionFactor;
+        float trapInt = aiModel.TrapIntensityFactor;
+
+        // More complexity = more branches / dead ends
+        branchingFactor = Mathf.Lerp(0.25f, 0.55f, complexity);
+
+        // Trap density along main path
+        trapDensityOnPath = Mathf.Lerp(0.03f, 0.10f, trapInt);
+
+        // Enemy density along main path
+        enemyDensityOnPath = Mathf.Lerp(0.02f, 0.08f, enemyAgg);
+
+        // Min/max enemy count on the main path
+        float enemyCountRatio = Mathf.Lerp(0.7f, 1.3f, enemyAgg);
+        minEnemyCount = Mathf.RoundToInt(Mathf.Clamp(1 * enemyCountRatio, 1, 5));
+        maxEnemyCount = Mathf.RoundToInt(Mathf.Clamp(5 * enemyCountRatio, 2, 10));
+    }
+
     private void BakeNavMesh() {
         if (navSurface != null) {
             navSurface.BuildNavMesh();
@@ -185,6 +217,7 @@ public class MazeGenerator : MonoBehaviour {
             if (unvisited.Count == 0)
                 break;
 
+            // Sort by distance to goal so backbone generally moves toward exit
             unvisited.Sort((a, b) =>
                 Vector2Int.Distance(a, end).CompareTo(Vector2Int.Distance(b, end)));
 
@@ -207,6 +240,7 @@ public class MazeGenerator : MonoBehaviour {
         q.Enqueue(start);
         inMaze.Add(start);
 
+        // First, flood from the backbone
         while (q.Count > 0) {
             var c = q.Dequeue();
             foreach (var n in GetNeighbors(c)) {
@@ -222,6 +256,8 @@ public class MazeGenerator : MonoBehaviour {
                 if (!inMaze.Contains(n))
                     frontier.Add(n);
 
+        // Higher branchingFactor = more frontier cells incorporated,
+        // producing more dead ends and alternate routes.
         while (frontier.Count > 0) {
             int idx = rng.Next(frontier.Count);
             Vector2Int active = default;
@@ -307,7 +343,7 @@ public class MazeGenerator : MonoBehaviour {
 
     private void BuildWalls() {
         if (!wallPrefab || !mazeRoot) {
-            Debug.LogError("WallPrefab or MazeRoot is not assigned!");
+            Debug.LogError("MazeGenerator: WallPrefab or MazeRoot is not assigned!");
             return;
         }
 
@@ -345,34 +381,25 @@ public class MazeGenerator : MonoBehaviour {
         }
     }
 
-
     private void SpawnWall(Vector3 pos, Vector3 scale) {
         GameObject w = Instantiate(wallPrefab, pos, Quaternion.identity, mazeRoot);
         w.transform.localScale = scale;
-        
-        // Ensure the wall is static for proper NavMesh baking
         w.isStatic = true;
-        
         spawnedWalls.Add(w);
     }
 
     private void BuildFloor() {
         if (!floorPrefab || !mazeRoot) {
-            Debug.LogError("FloorPrefab or MazeRoot is not assigned!");
+            Debug.LogError("MazeGenerator: FloorPrefab or MazeRoot is not assigned!");
             return;
         }
 
-        // Create a single large floor that covers the entire maze area
-        Vector3 floorPosition = mazeRoot.position + new Vector3(0f, -0.1f, 0f); // Slightly below the maze root to ensure proper placement
+        Vector3 floorPosition = mazeRoot.position + new Vector3(0f, -0.1f, 0f);
         Vector3 floorScale = new Vector3(width * cellSize, 0.1f, height * cellSize);
-        
+
         GameObject floor = Instantiate(floorPrefab, floorPosition, Quaternion.identity, mazeRoot);
         floor.transform.localScale = floorScale;
-        
-        // Name the floor object for easy identification
         floor.name = "MazeFloor";
-        
-        // Ensure the floor is static for proper NavMesh baking
         floor.isStatic = true;
     }
 
@@ -408,10 +435,14 @@ public class MazeGenerator : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Calculates the main path from A to B, draws it with LineRenderer,
+    /// and spawns enemies and traps along it.
+    /// </summary>
     private void DrawMainPathAndHazards() {
         List<Vector2Int> path = BfsPath(startCell, endCell);
         if (path == null || path.Count == 0) {
-            Debug.LogWarning("No path found between A and B.");
+            Debug.LogWarning("MazeGenerator: No path found between A and B.");
             return;
         }
 
@@ -433,10 +464,8 @@ public class MazeGenerator : MonoBehaviour {
         SpawnEnemiesAndTrapsOnMainPath(path);
     }
 
-
-
     /// <summary>
-    /// Snap a world position to the center of the nearest maze cell.
+    /// Convert arbitrary world position to nearest cell center (same Y).
     /// </summary>
     public Vector3 SnapToCellCenter(Vector3 worldPos) {
         Vector3 local = worldPos - mazeRoot.position;
@@ -461,8 +490,10 @@ public class MazeGenerator : MonoBehaviour {
     }
 
     /// <summary>
-    /// Returns centers of neighbor cells that are connected (no wall between)
-    /// AND have clear line of sight (no collider between them).
+    /// Returns centers of neighbor cells that:
+    /// - Are logically connected (no wall between them).
+    /// - Have clear line-of-sight (no wall collider between centers).
+    /// Used by enemy AI to wander without walking through walls.
     /// </summary>
     public List<Vector3> GetVisibleNeighborCellCenters(Vector3 worldPos) {
         List<Vector3> result = new();
@@ -474,13 +505,11 @@ public class MazeGenerator : MonoBehaviour {
         Vector3 currentCenter = origin + new Vector3(cell.x * cellSize, 0f, cell.y * cellSize);
 
         foreach (var n in neighbors) {
-            // Skip if there is a logical wall between cells in the maze graph
             if (HasWallBetween(cell, n))
                 continue;
 
             Vector3 neighborCenter = origin + new Vector3(n.x * cellSize, 0f, n.y * cellSize);
 
-            // Line-of-sight check: there must be no wall collider between centers
             Vector3 dir = (neighborCenter - currentCenter).normalized;
             float dist = Vector3.Distance(currentCenter, neighborCenter);
 
@@ -489,7 +518,6 @@ public class MazeGenerator : MonoBehaviour {
                                 dist - 0.1f,
                                 wallMask,
                                 QueryTriggerInteraction.Ignore)) {
-                // Something in wallMask is between the two cells (e.g. a wall)
                 continue;
             }
 
@@ -499,8 +527,9 @@ public class MazeGenerator : MonoBehaviour {
         return result;
     }
 
-
-
+    /// <summary>
+    /// Spawns enemies and traps along the main path using AI-controlled densities.
+    /// </summary>
     private void SpawnEnemiesAndTrapsOnMainPath(List<Vector2Int> mainPath) {
         if ((enemyPrefabs == null || enemyPrefabs.Length == 0) &&
             (trapPrefabs == null || trapPrefabs.Length == 0))
@@ -510,8 +539,17 @@ public class MazeGenerator : MonoBehaviour {
         if (pathLength < 5)
             return;
 
-        int enemyCount = Mathf.Clamp(Mathf.RoundToInt(pathLength * enemyDensityOnPath), 1, 10);
-        int trapCount = Mathf.Clamp(Mathf.RoundToInt(pathLength * trapDensityOnPath), 1, 15);
+        int enemyCount = Mathf.Clamp(
+            Mathf.RoundToInt(pathLength * enemyDensityOnPath),
+            minEnemyCount,
+            maxEnemyCount
+        );
+
+        int trapCount = Mathf.Clamp(
+            Mathf.RoundToInt(pathLength * trapDensityOnPath),
+            1,
+            20
+        );
 
         System.Random hazardRng = new(rng.Next() + 2000);
         Vector3 origin = mazeRoot.position - new Vector3(width * cellSize * 0.5f, 0f, height * cellSize * 0.5f);
@@ -525,6 +563,7 @@ public class MazeGenerator : MonoBehaviour {
             return true;
         }
 
+        // Enemies on main path
         if (enemyPrefabs != null && enemyPrefabs.Length > 0) {
             for (int i = 0; i < enemyCount; i++) {
                 int idx = hazardRng.Next(1, pathLength - 1);
@@ -545,6 +584,7 @@ public class MazeGenerator : MonoBehaviour {
             }
         }
 
+        // Traps on main path
         if (trapPrefabs != null && trapPrefabs.Length > 0) {
             for (int i = 0; i < trapCount; i++) {
                 int idx = hazardRng.Next(1, pathLength - 1);
@@ -605,7 +645,9 @@ public class MazeGenerator : MonoBehaviour {
         return path;
     }
 
-
+    /// <summary>
+    /// Destroys all generated maze content (walls, props, enemies, traps).
+    /// </summary>
     private void ClearMaze() {
         foreach (var w in spawnedWalls)
             if (w) Destroy(w);

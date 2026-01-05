@@ -22,42 +22,30 @@ public class DeathFlowController : MonoBehaviour {
     /// Later this will also handle black-screen + Observer message.
     /// </summary>
     public void HandleRoomFail(
-        RoomType roomType,
-        RoomMetrics metrics,
+        RunMetrics metrics,
         Action onAfterAIUpdatedAndBeforeRespawn,
         Action onRespawn
     ) {
-        // 1) Update AIModel
-        if (GameManager.Instance != null && GameManager.Instance.AIModel != null) {
-            var ai = GameManager.Instance.AIModel;
-            ai.RegisterRoomResult(
-                success: false,
-                solveTimeSeconds: metrics.solveTimeSeconds,
-                mistakes: metrics.mistakes,
-                detections: metrics.detections
-            );
-        }
-
-        // 2) Register global death stats
+        // 1) Register global death stats
         if (GameManager.Instance != null) {
             GameManager.Instance.RegisterDeath();
         }
 
         if (logMessages) {
-            Debug.Log($"[DeathFlow] Room fail recorded. Type={roomType}, time={metrics.solveTimeSeconds}, mistakes={metrics.mistakes}, detections={metrics.detections}");
+            Debug.Log($"[DeathFlow] Room fail recorded. time={metrics.solveTimeSeconds}, mistakes={metrics.mistakes}");
         }
 
-        // 3) Play Observer message before respawn
+        // 2) Play Observer message before respawn
         if (ObserverManager.Instance != null) {
             // For now, we'll assume it's always a death message since timeout is handled separately
             // In a full implementation, we'd pass information about the type of failure
             ObserverManager.Instance.PlayDeathMessage();
         }
         
-        // 4) Optional hook: e.g. choose additional Observer message, etc.
+        // 3) Optional hook: e.g. choose additional Observer message, etc.
         onAfterAIUpdatedAndBeforeRespawn?.Invoke();
 
-        // 5) Respawn callback (e.g. put player back into elevator)
+        // 4) Respawn callback (e.g. put player back into elevator)
         onRespawn?.Invoke();
     }
 }

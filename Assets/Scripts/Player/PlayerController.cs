@@ -2,6 +2,7 @@ using UnityEngine;
 
 //[RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour {
+    
     [Header("Components")]
     private CharacterController controller;
     private FPSCameraController cameraController;
@@ -46,6 +47,16 @@ public class PlayerController : MonoBehaviour {
 
     private Vector2 moveInput;
     private Vector2 lookInput;
+    
+    // Metrics for AI analysis
+    private float movementSpeedTracker = 0f;
+    private float standingStillTime = 0f;
+    private float lastMovementTime = 0f;
+    private Vector3 lastPosition = Vector3.zero;
+    private PlayerHealth playerHealth;
+    
+    public float MovementSpeedTracker => movementSpeedTracker;
+    public float StandingStillTime => standingStillTime;
 
     [Header("Crouch State")]
     private bool isCrouching;
@@ -77,6 +88,37 @@ public class PlayerController : MonoBehaviour {
         ApplyMovement();
         Look();
         UpdateCameraState();
+        TrackPlayerMetrics();
+    }
+    
+    private void TrackPlayerMetrics() {
+        // Track movement speed
+        Vector3 currentPos = transform.position;
+        float distance = Vector3.Distance(lastPosition, currentPos);
+        float deltaTime = Time.deltaTime;
+        
+        if (deltaTime > 0) {
+            float currentSpeed = distance / deltaTime;
+            
+            // Calculate a normalized movement speed (0-1 range based on walk/sprint speeds)
+            float maxSpeed = Mathf.Max(walkSpeed, sprintSpeed);
+            movementSpeedTracker = Mathf.Clamp01(currentSpeed / maxSpeed);
+            
+            // Update standing still time
+            if (currentSpeed < 0.1f) { // Considered standing still if moving very slowly
+                standingStillTime += deltaTime;
+            } else {
+                standingStillTime = 0f; // Reset when player moves
+            }
+        }
+        
+        lastPosition = currentPos;
+    }
+
+    private void Start() {
+        playerHealth = GetComponent<PlayerHealth>();
+        lastPosition = transform.position;
+        lastMovementTime = Time.time;
     }
 
     private void HandleInput() {

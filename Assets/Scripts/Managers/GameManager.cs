@@ -43,10 +43,8 @@ public class GameManager : MonoBehaviour {
         roomsCompleted++;
         currentRunScore += scoreGain;
 
-        if (roomsCompleted >= 3) {
-            Debug.Log("PLAYER WINS! All 3 maze runs completed.");
-            // TODO: Trigger final escape sequence / ending.
-        }
+        Debug.Log("PLAYER WINS! All 3 maze runs completed.");
+        // TODO: Trigger final escape sequence / ending.
     }
 
     /// <summary>

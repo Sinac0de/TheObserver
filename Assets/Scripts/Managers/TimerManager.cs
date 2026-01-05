@@ -7,6 +7,9 @@ using UnityEngine.Events;
 /// </summary>
 public class TimerManager : MonoBehaviour
 {
+
+    public static TimerManager Instance { get; private set; }
+
     [Header("Timer Settings")]
     [SerializeField] private float initialTimeLimit = 300f; // 5 minutes default
     [SerializeField] private float warningThreshold = 60f; // 1 minute warning
@@ -27,6 +30,18 @@ public class TimerManager : MonoBehaviour
     public float RemainingTime => remainingTime;
     public bool IsRunning => isRunning;
     public bool IsTimeOut => remainingTime <= 0f;
+
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(this.gameObject);
+    }
 
     private void Start()
     {

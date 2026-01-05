@@ -10,6 +10,7 @@ public class FloorElevatorController : MonoBehaviour {
     public Animator doorAnimator;
     public MazeRoomController mazeRoom; // For Floor1 only; use Horror/Boss for other floors
     [SerializeField] Transform playerSpawnPosition;
+    [SerializeField] FlashlightController flaslightController;
 
     private bool roomStarted;
 
@@ -41,6 +42,8 @@ public class FloorElevatorController : MonoBehaviour {
         if (health != null) {
             health.ResetHealth();
         }
+
+        flaslightController.RefillBattery();
 
 
         var pc = player.GetComponent<PlayerController>();
