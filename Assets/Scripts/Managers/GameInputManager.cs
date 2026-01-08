@@ -24,6 +24,12 @@ public class GameInputManager : MonoBehaviour {
     public event Action OnSprintEnd;
     public event Action OnCrouchStart;
     public event Action OnCrouchEnd;
+    
+    // Menu Navigation Events
+    public event Action OnNavigateUp;
+    public event Action OnNavigateDown;
+    public event Action OnNavigateLeft;
+    public event Action OnNavigateRight;
 
     private void Awake() {
         if (Instance != null && Instance != this) {
@@ -53,8 +59,14 @@ public class GameInputManager : MonoBehaviour {
 
     private void InitializeInputActions() {
         // Move
-        playerInputActions.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
-        playerInputActions.Player.Move.canceled += ctx => moveInput = Vector2.zero;
+        playerInputActions.Player.Move.performed += ctx => {
+            moveInput = ctx.ReadValue<Vector2>();
+            HandleMoveInput(moveInput);
+        };
+        playerInputActions.Player.Move.canceled += ctx => {
+            moveInput = Vector2.zero;
+            HandleMoveInput(Vector2.zero);
+        };
 
         // Look
         playerInputActions.Player.Look.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
@@ -108,4 +120,33 @@ public class GameInputManager : MonoBehaviour {
 
     // Reset Jump Press (after consuming for jump buffer)
     public void ConsumeJumpPress() => isJumpPressed = false;
+    
+    private void HandleMoveInput(Vector2 input)
+    {
+        // Only trigger navigation events when in menu states
+        if (MenuManager.Instance != null && 
+            (MenuManager.Instance.CurrentState == MenuManager.MenuState.MainMenu || 
+             MenuManager.Instance.CurrentState == MenuManager.MenuState.Settings ||
+             MenuManager.Instance.CurrentState == MenuManager.MenuState.Paused))
+        {
+            // Detect horizontal movement for left/right navigation
+            if (input.x > 0.5f && input.x > Mathf.Abs(input.y))
+            {
+                OnNavigateRight?.Invoke();
+            }
+            else if (input.x < -0.5f && Mathf.Abs(input.x) > Mathf.Abs(input.y))
+            {
+                OnNavigateLeft?.Invoke();
+            }
+            // Detect vertical movement for up/down navigation
+            else if (input.y > 0.5f && input.y > Mathf.Abs(input.x))
+            {
+                OnNavigateUp?.Invoke();
+            }
+            else if (input.y < -0.5f && Mathf.Abs(input.y) > Mathf.Abs(input.x))
+            {
+                OnNavigateDown?.Invoke();
+            }
+        }
+    }
 }
