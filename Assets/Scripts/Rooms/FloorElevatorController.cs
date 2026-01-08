@@ -43,10 +43,11 @@ public class FloorElevatorController : MonoBehaviour {
             health.ResetHealth();
         }
 
-        flaslightController.RefillBattery();
+        //flaslightController.RefillBattery();
 
 
         var pc = player.GetComponent<PlayerController>();
+        Debug.Log(pc);
         if (pc != null) {
             pc.TeleportTo(playerSpawnPosition.transform.position, playerSpawnPosition.transform.rotation);
         } else {

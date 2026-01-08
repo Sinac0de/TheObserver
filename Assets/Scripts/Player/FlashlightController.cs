@@ -53,7 +53,7 @@ public class FlashlightController : MonoBehaviour
 
     private void DrainBattery()
     {
-        if (MazeRoomController.Instance.GetIsRunning()) {
+        if (!MazeRoomController.Instance.GetIsRunning()) {
             float drainRate = batteryDrainRate * Time.deltaTime;
 
 
