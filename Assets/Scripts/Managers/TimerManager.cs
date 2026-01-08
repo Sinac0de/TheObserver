@@ -30,6 +30,9 @@ public class TimerManager : MonoBehaviour
     public float RemainingTime => remainingTime;
     public bool IsRunning => isRunning;
     public bool IsTimeOut => remainingTime <= 0f;
+    
+    private float elapsedTime = 0f;
+    public float ElapsedTime => elapsedTime;
 
 
     private void Awake()
@@ -53,6 +56,7 @@ public class TimerManager : MonoBehaviour
         if (!isRunning) return;
         
         remainingTime -= Time.deltaTime;
+        elapsedTime += Time.deltaTime; // Track elapsed time
         
         // Trigger warning events
         if (!isWarningTriggered && remainingTime <= warningThreshold)
@@ -104,6 +108,7 @@ public class TimerManager : MonoBehaviour
     public void ResetTimer()
     {
         remainingTime = initialTimeLimit;
+        elapsedTime = 0f; // Reset elapsed time
         StopTimer();
         isWarningTriggered = false;
         isCriticalTriggered = false;

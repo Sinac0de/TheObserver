@@ -48,8 +48,14 @@ public class SaveGameManager : MonoBehaviour
 
     [Header("Save Configuration")]
     [SerializeField] private string saveFileName = "game_save.dat";
-    [SerializeField] private bool autoSaveEnabled = true;
+    [SerializeField] private bool _autoSaveEnabled = true;
     [SerializeField] private float autoSaveInterval = 300f; // 5 minutes
+    
+    public bool autoSaveEnabled
+    {
+        get => _autoSaveEnabled;
+        set => _autoSaveEnabled = value;
+    }
 
     private SaveGameData currentSaveData;
     private string saveFilePath;
@@ -78,7 +84,7 @@ public class SaveGameManager : MonoBehaviour
     private void Update()
     {
         // Handle auto-save
-        if (autoSaveEnabled && 
+        if (_autoSaveEnabled && 
             MenuManager.Instance != null && 
             MenuManager.Instance.CurrentState == MenuManager.MenuState.InGame &&
             Time.time - lastAutoSaveTime >= autoSaveInterval)

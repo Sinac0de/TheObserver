@@ -1,0 +1,91 @@
+# Menu System Setup Guide
+
+This document explains how to set up the professional menu system for The Observer game.
+
+## Required Components
+
+### 1. Core Managers (Automatically Created)
+- MenuManager - Controls all menu states and transitions
+- SaveGameManager - Handles save/load functionality
+- SettingsManager - Manages game settings
+- SceneTransitionManager - Handles smooth scene transitions
+
+### 2. UI Components
+
+#### Main Menu Scene Setup
+Create a new scene called "MainMenu" and add the following:
+
+1. **Canvas** (Unity UI)
+   - Set Render Mode to "Screen Space - Overlay"
+
+2. **EventSystem** (Required for UI interaction)
+
+3. **MainMenuUI** component on a GameObject
+   - Configure the serialized fields:
+     - Main Menu Panel
+     - Settings Panel  
+     - Credits Panel
+     - All buttons and text elements
+
+4. **MenuInputHandler** component for keyboard/controller navigation
+
+5. **MenuSystemInitializer** to ensure managers are created at startup
+
+#### In-Game Setup
+Add to your main camera or player controller:
+
+1. **PauseInputHandler** for pause functionality (Escape key by default)
+2. **PauseMenuUI** component for the pause menu UI
+   - Configure panels and buttons in the inspector
+
+### 3. Integration Points
+
+#### Existing Game Objects
+The system integrates with:
+- GameManager - for game state coordination
+- PlayerHealth - for saving/loading player health
+- FlashlightController - for saving/loading flashlight state
+- TimerManager - for saving play time
+
+## Key Features
+
+### Main Menu
+- New Game: Starts a fresh game session
+- Continue: Loads from saved game (if available)
+- Settings: Adjust audio, graphics, and control settings
+- Quit: Exits the application
+
+### Pause Menu
+- Resume: Returns to gameplay
+- Settings: Access settings while paused
+- Main Menu: Return to main menu
+- Quit: Exit application
+
+### Save System
+- Auto-save every 5 minutes during gameplay
+- Manual save capability
+- Last save time display on Continue button
+- Position, health, and flashlight state preservation
+
+### Scene Transitions
+- Smooth asynchronous loading with progress bar
+- Minimum loading time for better UX
+- Customizable loading screen
+
+## Usage Notes
+
+1. The MenuManager uses a singleton pattern and persists across scenes
+2. SaveGameManager automatically handles save data serialization
+3. Pause functionality respects game state (can't pause in menus)
+4. All UI elements are configurable through the inspector
+5. Keyboard and controller input are supported
+
+## Customization
+
+To customize the menu appearance:
+1. Modify the UI elements in the Canvas hierarchy
+2. Adjust colors, fonts, and animations in the inspector
+3. Update the styling in the MainMenuUI and PauseMenuUI scripts if needed
+
+For audio settings, you'll need to connect the volume sliders to your audio system.
+For graphics settings, connect quality level changes to Unity's QualitySettings.

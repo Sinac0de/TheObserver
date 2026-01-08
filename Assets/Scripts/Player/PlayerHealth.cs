@@ -74,4 +74,11 @@ public class PlayerHealth : MonoBehaviour {
         isImmune = false;
         StopAllCoroutines();
     }
+    
+    /// <summary>
+    /// Set health to a specific value
+    /// </summary>
+    public void SetHealth(int health) {
+        currentHealth = Mathf.Clamp(health, 0, maxHealth);
+    }
 }

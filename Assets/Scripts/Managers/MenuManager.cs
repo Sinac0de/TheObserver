@@ -31,7 +31,6 @@ public class MenuManager : MonoBehaviour
         Loading,
         InGame,
         Paused,
-        Settings,
         Credits
     }
 
@@ -143,31 +142,7 @@ public class MenuManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Open settings menu
-    /// </summary>
-    public void OpenSettings()
-    {
-        MenuState previousState = currentState;
-        currentState = MenuState.Settings;
-        OnMenuStateChanged?.Invoke(currentState);
-    }
 
-    /// <summary>
-    /// Close settings and return to previous state
-    /// </summary>
-    public void CloseSettings()
-    {
-        // Logic to determine where to return to
-        if (isPaused)
-            currentState = MenuState.Paused;
-        else if (SceneManager.GetActiveScene().name == gameSceneName)
-            currentState = MenuState.InGame;
-        else
-            currentState = MenuState.MainMenu;
-
-        OnMenuStateChanged?.Invoke(currentState);
-    }
 
     /// <summary>
     /// Quit the application

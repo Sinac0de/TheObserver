@@ -176,4 +176,13 @@ public class FlashlightController : MonoBehaviour
     {
         currentBattery = Mathf.Clamp(currentBattery + amount, 0f, maxBattery);
     }
+    
+    /// <summary>
+    /// Sets battery level to a specific percentage
+    /// </summary>
+    public void SetBatteryLevel(float percentage)
+    {
+        currentBattery = Mathf.Clamp((percentage / 100f) * maxBattery, 0f, maxBattery);
+        UpdateFlashlightState();
+    }
 }

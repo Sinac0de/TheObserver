@@ -126,7 +126,6 @@ public class GameInputManager : MonoBehaviour {
         // Only trigger navigation events when in menu states
         if (MenuManager.Instance != null && 
             (MenuManager.Instance.CurrentState == MenuManager.MenuState.MainMenu || 
-             MenuManager.Instance.CurrentState == MenuManager.MenuState.Settings ||
              MenuManager.Instance.CurrentState == MenuManager.MenuState.Paused))
         {
             // Detect horizontal movement for left/right navigation

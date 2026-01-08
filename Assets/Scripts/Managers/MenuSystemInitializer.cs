@@ -8,11 +8,9 @@ public class MenuSystemInitializer : MonoBehaviour
     [Header("Menu System Prefabs")]
     [SerializeField] private GameObject menuManagerPrefab;
     [SerializeField] private GameObject saveGameManagerPrefab;
-    [SerializeField] private GameObject settingsManagerPrefab;
     [SerializeField] private GameObject sceneTransitionManagerPrefab;
 
     [Header("Initialization Order")]
-    [SerializeField] private bool initializeSettingsFirst = true;
     [SerializeField] private bool initializeSaveFirst = true;
 
     private bool isInitialized = false;
@@ -27,9 +25,6 @@ public class MenuSystemInitializer : MonoBehaviour
         if (isInitialized) return;
 
         // Initialize managers in proper order
-        if (initializeSettingsFirst)
-            InitializeSettingsManager();
-
         if (initializeSaveFirst)
             InitializeSaveGameManager();
 
@@ -70,19 +65,6 @@ public class MenuSystemInitializer : MonoBehaviour
         }
     }
 
-    private void InitializeSettingsManager()
-    {
-        if (SettingsManager.Instance == null)
-        {
-            GameObject managerObj = Instantiate(settingsManagerPrefab);
-            if (managerObj == null)
-            {
-                // Create empty GameObject if prefab isn't assigned
-                managerObj = new GameObject("SettingsManager");
-                managerObj.AddComponent<SettingsManager>();
-            }
-        }
-    }
 
     private void InitializeSceneTransitionManager()
     {
