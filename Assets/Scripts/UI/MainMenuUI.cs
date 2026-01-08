@@ -74,10 +74,10 @@ public class MainMenuUI : MonoBehaviour
         else
         {
             if (continueButtonText != null)
-                continueButtonText.text = "NEW GAME";
+                continueButtonText.text = "CONTINUE";
 
             if (continueSubtitleText != null)
-                continueSubtitleText.text = "No save data";
+                continueSubtitleText.text = "No save data - will start new game";
         }
     }
 
@@ -105,11 +105,19 @@ public class MainMenuUI : MonoBehaviour
             }
             else
             {
-                // No save data, start new game
+                // No save data, start new game (same as Continue button behavior)
                 if (MenuManager.Instance != null)
                 {
                     MenuManager.Instance.StartNewGame();
                 }
+            }
+        }
+        else
+        {
+            // Fallback: start new game if SaveGameManager not available
+            if (MenuManager.Instance != null)
+            {
+                MenuManager.Instance.StartNewGame();
             }
         }
     }
