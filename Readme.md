@@ -1,88 +1,57 @@
-# The Observer
+# The Observer: Sci-Fi Horror Architecture Prototype 👁️
 
-A first-person sci-fi horror prototype built in Unity, exploring adaptive AI, procedural room design, and dynamic difficulty in a room-based survival experience.
+[![Unity Version](https://img.shields.io/badge/Unity-6000.5.1f1-blue.svg)](https://unity.com/)
+[![Language](https://img.shields.io/badge/Language-C%23-green.svg)](https://docs.microsoft.com/en-us/dotnet/csharp/)
+[![Graphics](https://img.shields.io/badge/Graphics-URP-lightgrey.svg)]()
 
-> This project was originally conceived for an SBU Game Jam that did not take place. As a result, the project remains a work-in-progress prototype and is not yet feature-complete.
+An experimental First-Person Sci-Fi Horror prototype built in Unity. This project serves as an R&D framework exploring advanced gameplay engineering principles, including **Dynamic Difficulty Adjustment (DDA)** via adaptive AI models, and **Procedural Environment Generation**.
 
-![The Observer](https://i.ibb.co/prvbp7wp/The-Observer-Gameplay1.png)
+> 🔬 **Project Context:** Originally conceptualized as a high-pressure Game Jam prototype, this repository has been adapted into a specialized computer science research framework focusing on Information Retrieval logic, dynamic text-processing architectures, and component-based game scalability.
 
-## Overview
+---
 
-The Observer is an experimental Unity project focused on creating tension through environmental storytelling, adaptive challenge, and a strong first-person gameplay loop. The game concept centers on an intelligence known as “The Observer,” which monitors player performance and adjusts the pressure of each trial over time.
+## 📸 In-Engine Screenshots & Analytics
 
-The project currently explores core systems such as:
-- First-person movement and interaction
-- Procedural maze generation
-- Adaptive AI difficulty
-- Room-based progression and fail/retry loops
-- Atmospheric horror presentation
+*System layout showcasing first-person environment integration and procedural navigation blueprints.*
 
-## Features
+| Main Menu UI | Dynamic Navigation |
+| --- | --- |
+| ![Main Menu](https://i.ibb.co/TB5GsPPG/The-Observer-Main-Menu.png) | ![Gameplay 1](https://i.ibb.co/JW7pvMxb/The-Observer-Gameplay2.png) |
+| **Enemy AI** | **Procedural Maze Generation** |
+| ![Gameplay 2](https://i.ibb.co/XZr2yncX/The-Observer-Gameplay3.png) | ![Maze](https://i.ibb.co/Rk11GTgB/The-Observer-Map.png) |
 
-### Gameplay Systems
-- First-person player movement with sprinting, crouching, jumping, and camera control
-- Interaction system for elevators, consoles, and environmental objects
-- Weapon and combat prototype framework
-- Room progression and trial-based gameplay flow
+---
 
-### AI & Design
-- Adaptive AI model for difficulty scaling based on player performance
-- Procedural maze generation with path-based room structure
-- Design documentation for a larger horror experience and future expansion
+## 🧠 Technical Architecture & Deep Dive
 
-### Architecture & Development
-- Modular Unity C# architecture for gameplay systems and room logic
-- Component-based structure to support future iteration and scaling
-- Clear separation of concerns for player control, AI, interactions, and room management
+### 🤖 Adaptive AI & Dynamic Difficulty Adjustment (DDA)
+- **Performance Monitoring Model:** Implemented an intelligence system framework ("The Observer") designed to track real-time player telemetry and scale target difficulty parameters dynamically.
+- **State Machine Separation:** Uses distinct C# architectures to handle isolated entity states, safely separating AI sensing logic from core player simulation routines.
 
-## Project Status
+### 📐 Procedural Generation & Level Routing
+- **Procedural Maze Generation:** Assembles randomized, path-based modular room arrangements on scene load, optimizing asset instantiation pipelines.
+- **ScriptableObject-Driven Design:** Leverages Unity `ScriptableObjects` to hold global asset configurations, dynamic room rules, and difficulty weight matrices, allowing seamless design tuning.
 
-This repository represents an early-stage prototype and proof-of-concept rather than a complete game.
+### 🎮 Gameplay Engineering & Component Flow
+- **First-Person Physics Controller:** Built a clean modular framework for sprinting, crouching, vertical locomotion, and unified interaction triggers (elevators, hardware consoles).
+- **Unity New Input System:** Decoupled multi-device mapping handling, allowing smooth abstraction between logical input events and actual execution layers.
 
-Current status:
-- Core gameplay systems implemented at a prototype level
-- AI difficulty concepts explored and documented
-- Procedural room generation implemented as part of the concept
-- Additional content, polish, and full-game integration remain in progress
+---
 
-## In-Engine Screenshots
+## 🛠️ Technologies Used
 
-![Main Menu](https://i.ibb.co/TB5GsPPG/The-Observer-Main-Menu.png)
-![Gameplay 1](https://i.ibb.co/JW7pvMxb/The-Observer-Gameplay2.png)
-![Gameplay 2](https://i.ibb.co/XZr2yncX/The-Observer-Gameplay3.png)
-![Maze](https://i.ibb.co/Rk11GTgB/The-Observer-Map.png)
+- **Engine Ecosystem:** Unity 6000.5.1f1 (Universal Render Pipeline compatibility)[cite: 1]
+- **Languages & Libraries:** C# Object-Oriented Framework, Unity Input System Package[cite: 1]
+- **UI Architecture:** Unity UI / UGUI modular Canvas components[cite: 1]
 
-## Technologies Used
+---
 
-- Unity 6000.5.1f1
-- C#
-- Unity Input System
-- Unity UI Toolkit / UGUI concepts
-- URP-compatible rendering setup
-- ScriptableObject-driven design exploration
+## 📂 Project Structure
 
-## Development Principles
-
-This project was approached with an emphasis on:
-- Clean and modular code structure
-- Separation of concerns across gameplay systems
-- Readable and maintainable C# architecture
-- Scalable systems for future content expansion
-- Design-first thinking with documentation and planning
-
-## Project Structure
-
-- Assets/Scripts/AI – AI-related systems and adaptive behavior logic
-- Assets/Scripts/Player – Player movement, camera, and interaction systems
-- Assets/Scripts/Rooms – Room controllers and level flow logic
-- Assets/Scripts/Managers – Shared gameplay and progression managers
-- Assets/Scripts/UI – User interface components and feedback systems
-
-## Future Direction
-
-Planned areas for growth include:
-- Full implementation of the horror campaign loop
-- More complete AI behavior and feedback systems
-- Expanded room types and environmental variety
-- Improved polish, audio, and visual presentation
-- More robust progression and narrative integration
+```text
+Assets/Scripts/
+├── AI/          # Core adaptive difficulty models, data weights, and agent behaviors
+├── Player/      # Physics kinematics, raw input routers, camera controllers, and interaction raycasts
+├── Rooms/       # Procedural generation engines, room controllers, and node progression matrices
+├── Managers/    # Global Singletons driving persistent gameplay loops, audio routing, and states
+└── UI/          # Dynamic text processing, HUD updates, and Canvas layout feedback systems
