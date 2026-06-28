@@ -86,6 +86,3 @@ Planned areas for growth include:
 - Expanded room types and environmental variety
 - Improved polish, audio, and visual presentation
 - More robust progression and narrative integration
-
-
-This project is currently unlicensed. If you intend to share or expand it publicly, consider adding a license file.
